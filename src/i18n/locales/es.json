@@ -1,0 +1,204 @@
+{
+    "welcome": "Bienvenido",
+    "status": {
+        "vacation": "MODO VACACIONES",
+        "grace": "⚠️ PERÍODO DE GRACIA",
+        "active": "ACTIVO",
+        "unknown": "ESTADO DESCONOCIDO"
+    },
+    "action": {
+        "check_in": "Estoy Bien",
+        "not_fine": "NO ESTOY BIEN",
+        "paused": "Pausado"
+    },
+    "message": {
+        "action_required": "ACCIÓN REQUERIDA",
+        "escalation_in": "Escalada en",
+        "last_confirmed": "Última confirmación: {{time}}",
+        "no_checkins": "Sin registros aún",
+        "next_due": "Próximo registro {{time}}",
+        "was_due": "El próximo registro era {{time}}",
+        "every_hours": "Cada {{hours}} horas"
+    },
+    "settings": {
+        "title": "Configuración",
+        "language": "Idioma",
+        "checkin_schedule": "Horario de Registro",
+        "checkin_schedule_desc": "¿Con qué frecuencia quieres registrarte?",
+        "reminders": "Recordatorios de Registro",
+        "reminders_label": "Notificaciones de Recordatorio",
+        "reminders_desc": "Recibir notificaciones cuando el registro venza",
+        "reminder_offset_label": "Antelación del Recordatorio",
+        "reminder_picker_due": "Cuando venza el registro",
+        "reminder_picker_before": "{{hours}} hora antes",
+        "reminder_picker_before_plural": "{{hours}} horas antes",
+        "escalation_alert": "Alerta de Escalada",
+        "escalation_sound_label": "Sonido de Alerta",
+        "escalation_sound_desc": "Reproducir sonido al escalar",
+        "system_check": "Verificación del Sistema",
+        "transparency": "Transparencia",
+        "timezone": "Zona Horaria",
+        "account": "Cuenta",
+        "sign_out": "Cerrar Sesión",
+        "send_test": "Enviar Alerta de Prueba a Contactos",
+        "test_alert_confirm_title": "Confirmar Prueba",
+        "test_alert_confirm_desc": "Esto enviará una notificación de prueba a todos tus contactos CONFIRMADOS. Se les informará que no se requiere ninguna acción.",
+        "test_alert_sent_title": "Enviado",
+        "test_alert_sent_desc": "La alerta de prueba ha sido enviada a tus contactos.",
+        "system_check_desc": "Verifica que tus notificaciones funcionen.",
+        "stop_preview": "Detener Vista Previa",
+        "test_alert_sound": "Probar Sonido de Alerta",
+        "select_ringtone": "Seleccionar Tono",
+        "volume": "Volumen",
+        "set_to_12h": "Cambiar a 12h",
+        "set_to_24h": "Cambiar a 24h",
+        "remind_me": "Recordarme",
+        "footer_version": "ImFine v1.0.0 (MVP)",
+        "view_notification_history": "Ver Historial de Notificaciones",
+        "view_notification_activity": "Ver tu actividad de notificaciones",
+        "current_timezone": "Actual: {{timezone}}",
+        "timezone_description": "Tu zona horaria se detecta automáticamente. Si viajas, se te pedirá que actualices tu horario de registro."
+    },
+    "common": {
+        "error": "Error",
+        "success": "Éxito",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar",
+        "save": "Guardar",
+        "not_found_title": "Esta pantalla no existe.",
+        "go_home": "¡Ir a la pantalla de inicio!",
+        "modal_title": "Modal"
+    },
+    "contacts": {
+        "title": "Contactos de Confianza",
+        "subtitle": "Estas personas serán notificadas si pierdes un registro.",
+        "add_contact": "Contacto",
+        "edit_contact": "Editar Contacto",
+        "delete_contact": "Eliminar Contacto",
+        "delete_confirmation": "¿Estás seguro de que quieres eliminar a {{name}}? Ya no serán notificados si pierdes un registro.",
+        "name": "Nombre",
+        "channel": "Canal",
+        "destination": "Destino",
+        "status_confirmed": "CONFIRMADO",
+        "status_pending": "SOLICITUD PENDIENTE",
+        "resend_invite": "Reenviar Invitación",
+        "import_device_contact": "Importar Contacto",
+        "no_contacts": "No hay contactos agregados aún.",
+        "save": "Guardar",
+        "save_changes": "Guardar Cambios",
+        "cancel": "Cancelar",
+        "linked_user_warning": "⚠️ Cambiar el destino puede romper el enlace con este usuario de ImFine.",
+        "error_fetch": "Error al obtener contactos",
+        "fill_fields": "Por favor, completa todos los campos",
+        "success_added": "Contacto agregado e invitación enviada.",
+        "invite_sent": "Invitación enviada con éxito.",
+        "error_invite": "Error al enviar la invitación",
+        "success_updated": "Contacto actualizado con éxito.",
+        "success_deleted": "Contacto eliminado con éxito.",
+        "error_delete": "Error al eliminar el contacto",
+        "permission_denied": "Permiso denegado",
+        "access_denied_desc": "Se denegó el acceso a los contactos. Por favor, ingresa los detalles manualmente.",
+        "no_contacts_device": "No se encontraron contactos en este dispositivo.",
+        "error_access_contacts": "Error al acceder a los contactos.",
+        "invalid_contact": "Contacto inválido",
+        "invalid_contact_desc": "Este contacto no tiene número de teléfono ni correo electrónico.",
+        "has_app": "✓ Tiene ImFine",
+        "push_label": "Token Push",
+        "email_label": "Dirección de correo electrónico",
+        "phone_label": "Número de teléfono"
+    },
+    "notification_history": {
+        "title": "Historial de Notificaciones",
+        "subtitle": "Línea de tiempo de todas las notificaciones enviadas a tus contactos",
+        "back": "← Atrás",
+        "empty_title": "No se han enviado notificaciones aún",
+        "empty_subtitle": "Las notificaciones aparecerán aquí cuando pierdas un registro o envíes una alerta de prueba",
+        "event_escalation": "ALERTA DE ESCALADA",
+        "event_resolution": "ALERTA DE RESOLUCIÓN",
+        "event_test": "ALERTA DE PRUEBA",
+        "event_contact_request": "SOLICITUD DE CONTACTO",
+        "status_delivered": "✅ Entregado",
+        "status_failed": "❌ Fallido",
+        "status_pending": "⏳ Pendiente",
+        "sent_to": "Enviado {{channel}} a {{destination}}",
+        "error_fetch": "Error al obtener el historial de notificaciones"
+    },
+    "escalation": {
+        "title": "Alerta de Emergencia Activa",
+        "subtitle": "Tus contactos han sido notificados",
+        "resolve_button": "Estoy a salvo ahora",
+        "description": "Perdiste tu registro y el período de gracia ha expirado. Tus contactos de confianza han sido alertados.",
+        "snooze": "Posponer 15m",
+        "resolved_title": "Resuelto",
+        "resolved_desc": "Tus contactos han sido notificados de que estás a salvo.",
+        "snoozed_title": "Pospuesto",
+        "snoozed_desc": "Verificaremos de nuevo en 15 minutos."
+    },
+    "onboarding": {
+        "slide1": {
+            "title": "Registros Diarios",
+            "description": "ImFine es un control de seguridad diario. Solo toca el botón una vez al día para hacernos saber que estás bien."
+        },
+        "slide2": {
+            "title": "Período de Gracia",
+            "description": "¿Perdiste tu hora? No te preocupes. Tienes un período de gracia de 1 hora para registrarte antes de que alertemos a alguien."
+        },
+        "slide3": {
+            "title": "Contactos de Confianza",
+            "description": "Si aún no te registras, alertaremos a tus contactos de confianza para que puedan verificar cómo estás."
+        },
+        "next": "Siguiente",
+        "get_started": "Comenzar",
+        "skip": "Saltar"
+    },
+    "ringtones": {
+        "default": {
+            "name": "Alerta Predeterminada",
+            "desc": "Sonido de alarma estándar"
+        },
+        "urgent": {
+            "name": "Urgente",
+            "desc": "Alerta más intensa"
+        },
+        "gentle": {
+            "name": "Suave",
+            "desc": "Opción de alerta más suave"
+        },
+        "siren": {
+            "name": "Sirena",
+            "desc": "Estilo de sirena de emergencia"
+        },
+        "chime": {
+            "name": "Campana",
+            "desc": "Sonido de campana agradable"
+        }
+    },
+    "home": {
+        "loading": "Cargando estado...",
+        "success_checkin": "Estás confirmado por hoy.",
+        "vacation_desc": "El modo vacaciones está activo. Desactívalo en Configuración para reanudar los registros.",
+        "grace_desc": "Pasaste tu hora de registro. Toca el botón inmediatamente para evitar alertar a tus contactos.",
+        "panic_active_desc": "Estás registrado. Toca el botón rojo si necesitas notificar inmediatamente a tus contactos que no estás BIEN.",
+        "active_desc": "Toca el botón para confirmar que estás BIEN.\n\nTus contactos de confianza serán notificados si olvidas registrarte con ellos.",
+        "panic_modal_title": "⚠️ ALERTA DE EMERGENCIA",
+        "panic_modal_desc": "¿Estás seguro? Esto notificará inmediatamente a tus contactos de confianza que necesitas ayuda.",
+        "panic_modal_button": "ENVIAR ALERTA"
+    },
+    "auth": {
+        "login_title": "Bienvenido de nuevo",
+        "signup_title": "Crear cuenta",
+        "login_subtitle": "Inicia sesión para continuar",
+        "signup_subtitle": "Regístrate para comenzar tus intervalos de seguridad",
+        "email_label": "Dirección de correo electrónico",
+        "email_placeholder": "nombre@ejemplo.com",
+        "password_label": "Contraseña",
+        "password_placeholder": "••••••••",
+        "login_button": "Iniciar sesión",
+        "signup_button": "Registrarse",
+        "already_account": "¿Ya tienes una cuenta? ",
+        "dont_have_account": "¿No tienes una cuenta? ",
+        "verification_sent": "¡Correo electrónico de verificación enviado!",
+        "fill_fields": "Por favor, completa todos los campos",
+        "disclaimer": "Al continuar, aceptas nuestros Términos y Política de Privacidad.\nEsta aplicación no es un servicio de emergencia."
+    }
+}

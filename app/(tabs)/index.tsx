@@ -1,5 +1,6 @@
 import { addHours, format, formatDistanceToNow } from 'date-fns';
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Screen } from '../../src/components/Screen';
 import { useProfile } from '../../src/hooks/useProfile';
@@ -7,6 +8,7 @@ import { api } from '../../src/lib/api';
 import { Colors, Spacing, Typography } from '../../src/theme';
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const { profile, loading, refetch } = useProfile();
   const [checkingIn, setCheckingIn] = useState(false);
   const [panicModalVisible, setPanicModalVisible] = useState(false);
@@ -45,10 +47,10 @@ export default function HomeScreen() {
     try {
       const { error } = await api.checkIn();
       if (error) throw error;
-      Alert.alert('Success', "You're confirmed for today.");
+      Alert.alert(t('common.success'), t('home.success_checkin'));
       refetch();
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      Alert.alert(t('common.error'), error.message);
     } finally {
       setCheckingIn(false);
     }
@@ -66,14 +68,14 @@ export default function HomeScreen() {
       // No need to alert, the UI will change automatically via real-time or refetch
       refetch();
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      Alert.alert(t('common.error'), error.message);
     }
   };
 
   if (loading && !profile) {
     return (
       <Screen style={styles.center}>
-        <Text style={Typography.body}>Loading status...</Text>
+        <Text style={Typography.body}>{t('home.loading')}</Text>
       </Screen>
     );
   }
@@ -83,28 +85,39 @@ export default function HomeScreen() {
     ? addHours(lastConfirmed, profile?.checkin_interval_hours || 24)
     : null;
 
+  const gracePeriodEnd = nextCheckIn ? addHours(nextCheckIn, 1) : null; // 1 hour grace
+
   const isOverdue = nextCheckIn && now > nextCheckIn;
+  const isGracePeriod = profile?.state === 'GRACE';
   const isVacation = profile?.vacation_mode;
 
   // New Logic: 
   // If VACATION -> Disabled
-  // If OVERDUE / GRACE / ESCALATED -> "I'm Fine" (Green)
+  // If OVERDUE / GRACE / ESCALATED -> "I'm Fine" (Green/Amber/Red context)
   // If ACTIVE & NOT OVERDUE -> "I'm NOT Fine" (Red Panic Button)
 
   const isPanicMode = profile?.state === 'ACTIVE' && !isOverdue && !isVacation;
-  const isButtonDisabled = isVacation; // Only disabled on vacation now
+  const isButtonDisabled = isVacation;
 
-  const stateLabel = isVacation ? 'VACATION MODE' : (profile?.state || 'STATUS UNKNOWN');
+  const stateLabel = isVacation ? t('status.vacation')
+    : isGracePeriod ? t('status.grace')
+      : (profile?.state === 'ACTIVE' ? t('status.active') : (profile?.state || t('status.unknown')));
 
   // Color Logic
-  // Vacation -> Gray
-  // Overdue/Grace/Escalated -> Green (to resolve) vs Red/Orange depending on severity? 
-  // Actually, if Escalated, we want them to say "I'm Fine" -> Green.
-  // If Panic Mode -> Red.
-
   const stateColor = isVacation ? Colors.textSecondary
-    : isPanicMode ? Colors.escalated
-      : Colors.active; // Green ("I'm Fine")
+    : isGracePeriod ? Colors.grace
+      : isPanicMode ? Colors.escalated
+        : Colors.active;
+
+  // Countdown Logic for Grace Period
+  const getGraceCountdown = () => {
+    if (!gracePeriodEnd) return '';
+    const diff = gracePeriodEnd.getTime() - now.getTime();
+    if (diff <= 0) return '00:00';
+    const m = Math.floor((diff / 1000 / 60) % 60);
+    const s = Math.floor((diff / 1000) % 60);
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
 
   return (
     <Screen style={styles.container}>
@@ -115,11 +128,21 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.main}>
-        <Text style={[Typography.body, styles.lastConfirmed]}>
-          {lastConfirmed
-            ? `Last confirmed: ${format(lastConfirmed, 'MMM d, h:mm a')}`
-            : 'No check-ins yet'}
-        </Text>
+        {isGracePeriod && (
+          <View style={styles.graceContainer}>
+            <Text style={styles.graceTitle}>{t('message.action_required')}</Text>
+            <Text style={styles.graceTimer}>{t('message.escalation_in')} {getGraceCountdown()}</Text>
+          </View>
+        )}
+
+        {/* Hide last confirmed text during grace period to reduce noise */}
+        {!isGracePeriod && (
+          <Text style={[Typography.body, styles.lastConfirmed]}>
+            {lastConfirmed
+              ? t('message.last_confirmed', { time: format(lastConfirmed, 'MMM d, h:mm a') })
+              : t('message.no_checkins')}
+          </Text>
+        )}
 
         <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
           <TouchableOpacity
@@ -140,16 +163,18 @@ export default function HomeScreen() {
                 styles.checkInText,
                 isButtonDisabled && { color: Colors.textSecondary }
               ]}>
-                {isVacation ? "Paused" : (isPanicMode ? "NOT FINE" : "I'm Fine")}
+                {isVacation ? t('action.paused') : (isPanicMode ? t('action.not_fine') : t('action.check_in'))}
               </Text>
             </View>
           </TouchableOpacity>
         </Animated.View>
 
-        {nextCheckIn && (
+        {!isGracePeriod && nextCheckIn && (
           <Text style={[Typography.caption, styles.nextCheckIn]}>
-            Next check-in {isOverdue ? 'was due ' : 'due '}
-            {formatDistanceToNow(nextCheckIn, { addSuffix: true })}
+            {isOverdue && !isGracePeriod
+              ? t('message.was_due', { time: formatDistanceToNow(nextCheckIn, { addSuffix: true }) })
+              : t('message.next_due', { time: formatDistanceToNow(nextCheckIn, { addSuffix: true }) })
+            }
           </Text>
         )}
       </View>
@@ -157,10 +182,12 @@ export default function HomeScreen() {
       <View style={styles.footer}>
         <Text style={styles.disclaimer}>
           {isVacation
-            ? "Vacation mode is active. Disable it in Settings to resume check-ins."
-            : isPanicMode
-              ? "You are checked in. Tap the red button if you need to immediately notify your contacts that you are not FINE."
-              : "Tap the button to confirm you're FINE.\n\nYour trusted contacts will be notified if you miss to check-in with them."}
+            ? t('home.vacation_desc')
+            : isGracePeriod
+              ? t('home.grace_desc')
+              : isPanicMode
+                ? t('home.panic_active_desc')
+                : t('home.active_desc')}
         </Text>
       </View>
 
@@ -168,16 +195,16 @@ export default function HomeScreen() {
       {isPanicMode && (
         <View style={panicModalVisible ? styles.modalOverlay : { display: 'none' }}>
           <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>⚠️ EMERGENCY ALERT</Text>
+            <Text style={styles.modalTitle}>{t('home.panic_modal_title')}</Text>
             <Text style={styles.modalText}>
-              Are you sure? This will immediately notify your trusted contacts that you need help.
+              {t('home.panic_modal_desc')}
             </Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity onPress={() => setPanicModalVisible(false)} style={[styles.modalBtn, styles.modalBtnCancel]}>
-                <Text style={styles.modalBtnText}>Cancel</Text>
+                <Text style={styles.modalBtnText}>{t('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={confirmPanic} style={[styles.modalBtn, styles.modalBtnConfirm]}>
-                <Text style={[styles.modalBtnText, { color: 'white' }]}>SEND ALERT</Text>
+                <Text style={[styles.modalBtnText, { color: 'white' }]}>{t('home.panic_modal_button')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -241,8 +268,8 @@ const styles = StyleSheet.create({
   },
   checkInText: {
     color: Colors.buttonText,
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '800',
   },
   checkInButtonDisabled: {
     borderColor: Colors.border,
@@ -313,4 +340,26 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 16,
   },
+  graceContainer: {
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
+    padding: Spacing.lg,
+    backgroundColor: '#FFF7ED', // Light orange background
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.grace,
+    width: '100%',
+  },
+  graceTitle: {
+    ...Typography.h2,
+    color: Colors.grace,
+    fontSize: 20,
+    marginBottom: Spacing.xs,
+  },
+  graceTimer: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: Colors.grace,
+    fontVariant: ['tabular-nums'],
+  }
 });

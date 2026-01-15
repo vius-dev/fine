@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "tmp_app",
-    "slug": "tmp_app",
+    "name": "FineApp",
+    "slug": "fineapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -34,6 +34,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a009906b-5f23-4e22-947b-044b5d9de538"
+      }
+    },
+    "owner": "feincom"
   }
 }

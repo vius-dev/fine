@@ -1,0 +1,204 @@
+{
+    "welcome": "Willkommen",
+    "status": {
+        "vacation": "URLAUBSMODUS",
+        "grace": "⚠️ GNADENFRIST",
+        "active": "AKTIV",
+        "unknown": "STATUS UNBEKANNT"
+    },
+    "action": {
+        "check_in": "Mir geht's gut",
+        "not_fine": "GEHT NICHT GUT",
+        "paused": "Pausiert"
+    },
+    "message": {
+        "action_required": "AKTION ERFORDERLICH",
+        "escalation_in": "Eskalation in",
+        "last_confirmed": "Zuletzt bestätigt: {{time}}",
+        "no_checkins": "Noch keine Check-ins",
+        "next_due": "Nächster Check-in {{time}}",
+        "was_due": "Nächster Check-in war {{time}}",
+        "every_hours": "Alle {{hours}} Stunden"
+    },
+    "settings": {
+        "title": "Einstellungen",
+        "language": "Sprache",
+        "checkin_schedule": "Check-in-Zeitplan",
+        "checkin_schedule_desc": "Wie oft möchten Sie einchecken?",
+        "reminders": "Check-in-Erinnerungen",
+        "reminders_label": "Erinnerungsbenachrichtigungen",
+        "reminders_desc": "Benachrichtigt werden, wenn der Check-in fällig ist",
+        "reminder_offset_label": "Erinnerungszeitpunkt",
+        "reminder_picker_due": "Wenn der Check-in fällig ist",
+        "reminder_picker_before": "{{hours}} Stunde vorher",
+        "reminder_picker_before_plural": "{{hours}} Stunden vorher",
+        "escalation_alert": "Eskalationsalarm",
+        "escalation_sound_label": "Alarmton",
+        "escalation_sound_desc": "Ton abspielen, wenn eskaliert",
+        "system_check": "Systemprüfung",
+        "transparency": "Transparenz",
+        "timezone": "Zeitzone",
+        "account": "Konto",
+        "sign_out": "Abmelden",
+        "send_test": "Testalarm an Kontakte senden",
+        "test_alert_confirm_title": "Test bestätigen",
+        "test_alert_confirm_desc": "Dies sendet eine Testbenachrichtigung an alle Ihre BESTÄTIGTEN Kontakte. Ihnen wird mitgeteilt, dass keine Aktion erforderlich ist.",
+        "test_alert_sent_title": "Gesendet",
+        "test_alert_sent_desc": "Der Testalarm wurde an Ihre Kontakte gesendet.",
+        "system_check_desc": "Vergewissern Sie sich, dass Ihre Benachrichtigungen funktionieren.",
+        "stop_preview": "Vorschau stoppen",
+        "test_alert_sound": "Alarmton testen",
+        "select_ringtone": "Klingelton auswählen",
+        "volume": "Lautstärke",
+        "set_to_12h": "Auf 12h einstellen",
+        "set_to_24h": "Auf 24h einstellen",
+        "remind_me": "Erinnere mich",
+        "footer_version": "ImFine v1.0.0 (MVP)",
+        "view_notification_history": "Benachrichtigungsverlauf anzeigen",
+        "view_notification_activity": "Ihre Benachrichtigungsaktivität anzeigen",
+        "current_timezone": "Aktuell: {{timezone}}",
+        "timezone_description": "Ihre Zeitzone wird automatisch erkannt. Wenn Sie reisen, werden Sie aufgefordert, Ihren Check-in-Zeitplan zu aktualisieren."
+    },
+    "common": {
+        "error": "Fehler",
+        "success": "Erfolg",
+        "cancel": "Abbrechen",
+        "confirm": "Bestätigen",
+        "save": "Speichern",
+        "not_found_title": "Diese Seite existiert nicht.",
+        "go_home": "Gehe zur Startseite!",
+        "modal_title": "Modal"
+    },
+    "contacts": {
+        "title": "Vertrauenskontakte",
+        "subtitle": "Diese Personen werden benachrichtigt, wenn Sie einen Check-in verpassen.",
+        "add_contact": "Kontakt ",
+        "edit_contact": "Kontakt bearbeiten",
+        "delete_contact": "Kontakt löschen",
+        "delete_confirmation": "Sind Sie sicher, dass Sie {{name}} entfernen möchten? Sie werden nicht mehr benachrichtigt, wenn Sie einen Check-in verpassen.",
+        "name": "Name",
+        "channel": "Kanal",
+        "destination": "Ziel",
+        "status_confirmed": "BESTÄTIGT",
+        "status_pending": "ANFRAGE AUSSTEHEND",
+        "resend_invite": "Einladung erneut senden",
+        "import_device_contact": "Gerätekontakt importieren",
+        "no_contacts": "Noch keine Kontakte hinzugefügt.",
+        "save": "Speichern",
+        "save_changes": "Änderungen speichern",
+        "cancel": "Abbrechen",
+        "linked_user_warning": "⚠️ Das Ändern des Ziels kann die Verbindung zu diesem ImFine-Benutzer unterbrechen.",
+        "error_fetch": "Fehler beim Abrufen der Kontakte",
+        "fill_fields": "Bitte füllen Sie alle Felder aus",
+        "success_added": "Kontakt hinzugefügt und Einladung gesendet.",
+        "invite_sent": "Einladung erfolgreich gesendet.",
+        "error_invite": "Fehler beim Senden der Einladung",
+        "success_updated": "Kontakt erfolgreich aktualisiert.",
+        "success_deleted": "Kontakt erfolgreich entfernt.",
+        "error_delete": "Fehler beim Löschen des Kontakts",
+        "permission_denied": "Berechtigung verweigert",
+        "access_denied_desc": "Der Zugriff auf Kontakte wurde verweigert. Bitte geben Sie die Details manuell ein.",
+        "no_contacts_device": "Keine Kontakte auf diesem Gerät gefunden.",
+        "error_access_contacts": "Fehler beim Zugriff auf Kontakte.",
+        "invalid_contact": "Ungültiger Kontakt",
+        "invalid_contact_desc": "Dieser Kontakt hat keine Telefonnummer oder E-Mail-Adresse.",
+        "has_app": "✓ Nutzt ImFine",
+        "push_label": "Push-Token",
+        "email_label": "E-Mail-Adresse",
+        "phone_label": "Telefonnummer"
+    },
+    "notification_history": {
+        "title": "Benachrichtigungsverlauf",
+        "subtitle": "Zeitachse aller an Ihre Kontakte gesendeten Benachrichtigungen",
+        "back": "← Zurück",
+        "empty_title": "Noch keine Benachrichtigungen gesendet",
+        "empty_subtitle": "Benachrichtigungen werden hier angezeigt, wenn Sie einen Check-in verpassen oder einen Testalarm senden",
+        "event_escalation": "ESKALATIONSALARM",
+        "event_resolution": "AUFLÖSUNGSALARM",
+        "event_test": "TESTALARM",
+        "event_contact_request": "KONTAKTANFRAGE",
+        "status_delivered": "✅ Zugestellt",
+        "status_failed": "❌ Fehlgeschlagen",
+        "status_pending": "⏳ Ausstehend",
+        "sent_to": "{{channel}} an {{destination}} gesendet",
+        "error_fetch": "Fehler beim Abrufen des Benachrichtigungsverlaufs"
+    },
+    "escalation": {
+        "title": "Notfallalarm aktiv",
+        "subtitle": "Ihre Kontakte wurden benachrichtigt",
+        "resolve_button": "Ich bin jetzt sicher",
+        "description": "Sie haben Ihren Check-in verpasst und die Gnadenfrist ist abgelaufen. Ihre Vertrauenskontakte wurden alarmiert.",
+        "snooze": "Schlummern 15m",
+        "resolved_title": "Gelöst",
+        "resolved_desc": "Ihre Kontakte wurden benachrichtigt, dass Sie in Sicherheit sind.",
+        "snoozed_title": "Schlummernd",
+        "snoozed_desc": "Wir werden in 15 Minuten erneut nach Ihnen sehen."
+    },
+    "onboarding": {
+        "slide1": {
+            "title": "Tägliche Check-ins",
+            "description": "ImFine ist eine tägliche Sicherheitsprüfung. Tippen Sie einfach einmal am Tag auf die Schaltfläche, um uns mitzuteilen, dass es Ihnen gut geht."
+        },
+        "slide2": {
+            "title": "Gnadenfrist",
+            "description": "Ihre Zeit verpasst? Keine Panik. Sie haben eine Gnadenfrist von 1 Stunde, um sich einzuchecken, bevor wir jemanden alarmieren."
+        },
+        "slide3": {
+            "title": "Vertrauenskontakte",
+            "description": "Wenn Sie sich immer noch nicht einchecken, werden wir Ihre Vertrauenskontakte alarmieren, damit sie nach Ihnen sehen können."
+        },
+        "next": "Weiter",
+        "get_started": "Loslegen",
+        "skip": "Überspringen"
+    },
+    "ringtones": {
+        "default": {
+            "name": "Standardalarm",
+            "desc": "Standardalarmton"
+        },
+        "urgent": {
+            "name": "Dringend",
+            "desc": "Intensiverer Alarm"
+        },
+        "gentle": {
+            "name": "Sanft",
+            "desc": "Sanftere Alarmoption"
+        },
+        "siren": {
+            "name": "Sirene",
+            "desc": "Notfallsirene"
+        },
+        "chime": {
+            "name": "Glockenspiel",
+            "desc": "Angenehmer Glockenton"
+        }
+    },
+    "home": {
+        "loading": "Status wird geladen...",
+        "success_checkin": "Sie sind für heute bestätigt.",
+        "vacation_desc": "Der Urlaubsmodus ist aktiv. Deaktivieren Sie ihn in den Einstellungen, um die Check-ins fortzusetzen.",
+        "grace_desc": "Sie haben Ihre Check-in-Zeit verpasst. Tippen Sie sofort auf die Schaltfläche, um zu verhindern, dass Ihre Kontakte alarmiert werden.",
+        "panic_active_desc": "Sie sind eingecheckt. Tippen Sie auf die rote Schaltfläche, wenn Sie Ihre Kontakte sofort benachrichtigen müssen, dass es Ihnen NICHT GUT geht.",
+        "active_desc": "Tippen Sie auf die Schaltfläche, um zu bestätigen, dass es Ihnen GUT geht.\n\nIhre Vertrauenskontakte werden benachrichtigt, wenn Sie vergessen, bei ihnen einzuchecken.",
+        "panic_modal_title": "⚠️ NOTFALLALARM",
+        "panic_modal_desc": "Sind Sie sicher? Dies wird Ihre Vertrauenskontakte sofort benachrichtigen, dass Sie Hilfe benötigen.",
+        "panic_modal_button": "ALARM SENDEN"
+    },
+    "auth": {
+        "login_title": "Willkommen zurück",
+        "signup_title": "Konto erstellen",
+        "login_subtitle": "Melden Sie sich an, um fortzufahren",
+        "signup_subtitle": "Registrieren Sie sich, um Ihre Sicherheitsintervalle zu starten",
+        "email_label": "E-Mail-Adresse",
+        "email_placeholder": "name@beispiel.com",
+        "password_label": "Passwort",
+        "password_placeholder": "••••••••",
+        "login_button": "Anmelden",
+        "signup_button": "Registrieren",
+        "already_account": "Haben Sie bereits ein Konto? ",
+        "dont_have_account": "Haben Sie noch kein Konto? ",
+        "verification_sent": "Bestätigungs-E-Mail gesendet!",
+        "fill_fields": "Bitte füllen Sie alle Felder aus",
+        "disclaimer": "Indem Sie fortfahren, stimmen Sie unseren Bedingungen und Datenschutzrichtlinien zu.\nDiese App ist kein Notfalldienst."
+    }
+}

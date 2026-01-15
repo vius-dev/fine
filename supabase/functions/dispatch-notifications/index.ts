@@ -23,7 +23,7 @@ serve(async (req: Request) => {
         );
 
         // 2. Parse Request Body (Expect { user_id: string })
-        const { user_id } = await req.json();
+        const { user_id, type = 'ESCALATION_ALERT' } = await req.json();
 
         if (!user_id) {
             throw new Error("Missing user_id");
@@ -76,7 +76,7 @@ serve(async (req: Request) => {
         const cooldownTimestamp = new Date(Date.now() - NOTIFICATION_COOLDOWN_MINUTES * 60000).toISOString();
 
         // Determine message content based on type
-        const { type = 'ESCALATION_ALERT' } = await req.clone().json(); // Re-parse or use cached body if possible, actually we need to pull it from the destructuring earlier.
+        // type parsed above
 
         let alertTitle = '🚨 Emergency Alert';
         let alertBody = `${user.email} needs help! They missed their check-in.`;
@@ -89,6 +89,18 @@ serve(async (req: Request) => {
         `;
         let smsBody = `🚨 URGENT: ${user.email} needs help! Missed check-in. Contact them immediately.`;
 
+        if (type === 'TEST_ALERT') {
+            alertTitle = '🔔 Test Alert';
+            alertBody = `This is a TEST alert from ${user.email}. No action required.`;
+            emailSubject = '🔔 ImFine Test Alert';
+            emailHtml = `
+                <h1>Test Alert</h1>
+                <p><strong>${user.email}</strong> is verifying their ImFine setup.</p>
+                <p>This is only a test. No action is required.</p>
+            `;
+            smsBody = `🔔 TEST: ${user.email} is testing ImFine. No action required.`;
+        }
+
         if (type === 'RESOLUTION_ALERT') {
             alertTitle = '✅ User is Safe';
             alertBody = `${user.email} has marked themselves as safe. The emergency is resolved.`;
@@ -100,6 +112,21 @@ serve(async (req: Request) => {
                 <p>Status: <strong>RESOLVED</strong></p>
             `;
             smsBody = `✅ RESOLVED: ${user.email} is safe. The emergency alert has been cancelled.`;
+        }
+
+        // Create notification event first
+        const { data: notificationEvent, error: eventError } = await supabase
+            .from('notification_events')
+            .insert({
+                user_id: user_id,
+                type: type,
+                metadata: { timestamp: new Date().toISOString() }
+            })
+            .select()
+            .single();
+
+        if (eventError || !notificationEvent) {
+            throw new Error(`Failed to create notification event: ${eventError?.message}`);
         }
 
         const results = await Promise.all(contacts.map(async (contact: any) => {
@@ -117,8 +144,8 @@ serve(async (req: Request) => {
                         .gte('created_at', cooldownTimestamp)
                         .limit(1);
 
-                    // Skip cooldown check for RESOLUTION_ALERT to ensure "Safe" message always gets through
-                    if (type !== 'RESOLUTION_ALERT' && recentNotifications && recentNotifications.length > 0) {
+                    // Skip cooldown check for RESOLUTION_ALERT and TEST_ALERT
+                    if (type !== 'RESOLUTION_ALERT' && type !== 'TEST_ALERT' && recentNotifications && recentNotifications.length > 0) {
                         console.log(`Skipping notification to ${contact.destination} - already notified within ${NOTIFICATION_COOLDOWN_MINUTES} minutes`);
                         return {
                             contact: contact.destination,
@@ -155,6 +182,7 @@ serve(async (req: Request) => {
                     if (response.ok) {
                         // Log successful delivery
                         await supabase.from('notification_deliveries').insert({
+                            event_id: notificationEvent.id,
                             channel: 'PUSH',
                             destination: pushToken,
                             payload: message,

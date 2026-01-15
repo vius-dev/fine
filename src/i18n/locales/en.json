@@ -1,0 +1,204 @@
+{
+    "welcome": "Welcome",
+    "status": {
+        "vacation": "VACATION MODE",
+        "grace": "⚠️ GRACE PERIOD",
+        "active": "ACTIVE",
+        "unknown": "STATUS UNKNOWN"
+    },
+    "action": {
+        "check_in": "I'm Fine",
+        "not_fine": "I'M NOT FINE",
+        "paused": "Paused"
+    },
+    "message": {
+        "action_required": "ACTION REQUIRED",
+        "escalation_in": "Escalation in",
+        "last_confirmed": "Last confirmed: {{time}}",
+        "no_checkins": "No check-ins yet",
+        "next_due": "Next check-in due {{time}}",
+        "was_due": "Next check-in was due {{time}}",
+        "every_hours": "Every {{hours}} hours"
+    },
+    "settings": {
+        "title": "Settings",
+        "language": "Language",
+        "checkin_schedule": "Check-in Schedule",
+        "checkin_schedule_desc": "How often do you want to check in?",
+        "reminders": "Check-in Reminders",
+        "reminders_label": "Reminder Notifications",
+        "reminders_desc": "Get notified when check-in is due",
+        "reminder_offset_label": "Reminder Offset",
+        "reminder_picker_due": "When check-in is due",
+        "reminder_picker_before": "{{hours}} hour before",
+        "reminder_picker_before_plural": "{{hours}} hours before",
+        "escalation_alert": "Escalation Alert",
+        "escalation_sound_label": "Alert Sound",
+        "escalation_sound_desc": "Play sound when escalated",
+        "system_check": "System Check",
+        "transparency": "Transparency",
+        "timezone": "Time Zone",
+        "account": "Account",
+        "sign_out": "Sign Out",
+        "send_test": "Send Test Alert to Contacts",
+        "test_alert_confirm_title": "Confirm Test",
+        "test_alert_confirm_desc": "This will send a test notification to all your CONFIRMED contacts. They will be told no action is required.",
+        "test_alert_sent_title": "Sent",
+        "test_alert_sent_desc": "Test alert has been sent to your contacts.",
+        "system_check_desc": "Verify that your notifications work.",
+        "stop_preview": "Stop Preview",
+        "test_alert_sound": "Test Alert Sound",
+        "select_ringtone": "Select Ringtone",
+        "volume": "Volume",
+        "set_to_12h": "Set to 12h",
+        "set_to_24h": "Set to 24h",
+        "remind_me": "Remind me",
+        "footer_version": "ImFine v1.0.0 (MVP)",
+        "view_notification_history": "View Notification History",
+        "view_notification_activity": "View your notification activity",
+        "current_timezone": "Current: {{timezone}}",
+        "timezone_description": "Your timezone is automatically detected. If you travel, you'll be prompted to update your check-in schedule."
+    },
+    "common": {
+        "error": "Error",
+        "success": "Success",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "save": "Save",
+        "not_found_title": "This screen doesn't exist.",
+        "go_home": "Go to home screen!",
+        "modal_title": "Modal"
+    },
+    "contacts": {
+        "title": "Trusted Contacts",
+        "subtitle": "These people will be notified if you miss a check-in.",
+        "add_contact": "Contact",
+        "edit_contact": "Edit Contact",
+        "delete_contact": "Delete Contact",
+        "delete_confirmation": "Are you sure you want to remove {{name}}? They will no longer be notified if you miss a check-in.",
+        "name": "Name",
+        "channel": "Channel",
+        "destination": "Destination",
+        "status_confirmed": "CONFIRMED",
+        "status_pending": "PENDING REQUEST",
+        "resend_invite": "Resend Invite",
+        "import_device_contact": "Import Device Contact",
+        "no_contacts": "No contacts added yet.",
+        "save": "Save",
+        "save_changes": "Save Changes",
+        "cancel": "Cancel",
+        "linked_user_warning": "⚠️ Changing the destination may break the link to this ImFine user.",
+        "error_fetch": "Failed to fetch contacts",
+        "fill_fields": "Please fill in all fields",
+        "success_added": "Contact added and invite sent.",
+        "invite_sent": "Invite sent successfully.",
+        "error_invite": "Failed to send invite",
+        "success_updated": "Contact updated successfully.",
+        "success_deleted": "Contact removed successfully.",
+        "error_delete": "Failed to delete contact",
+        "permission_denied": "Permission denied",
+        "access_denied_desc": "Access to contacts was denied. Please enter details manually.",
+        "no_contacts_device": "No contacts found on this device.",
+        "error_access_contacts": "Failed to access contacts.",
+        "invalid_contact": "Invalid Contact",
+        "invalid_contact_desc": "This contact has no phone number or email.",
+        "has_app": "✓ Has ImFine",
+        "push_label": "Push Token",
+        "email_label": "Email Address",
+        "phone_label": "Phone Number"
+    },
+    "notification_history": {
+        "title": "Notification History",
+        "subtitle": "Timeline of all notifications sent to your contacts",
+        "back": "← Back",
+        "empty_title": "No notifications sent yet",
+        "empty_subtitle": "Notifications will appear here when you miss a check-in or send a test alert",
+        "event_escalation": "ESCALATION ALERT",
+        "event_resolution": "RESOLUTION ALERT",
+        "event_test": "TEST ALERT",
+        "event_contact_request": "CONTACT REQUEST",
+        "status_delivered": "✅ Delivered",
+        "status_failed": "❌ Failed",
+        "status_pending": "⏳ Pending",
+        "sent_to": "Sent {{channel}} to {{destination}}",
+        "error_fetch": "Failed to fetch notification history"
+    },
+    "escalation": {
+        "title": "Emergency Alert Active",
+        "subtitle": "Your contacts have been notified",
+        "resolve_button": "I'm Safe Now",
+        "description": "You missed your check-in and the grace period has expired. Your trusted contacts have been alerted.",
+        "snooze": "Snooze 15m",
+        "resolved_title": "Resolved",
+        "resolved_desc": "Your contacts have been notified that you are safe.",
+        "snoozed_title": "Snoozed",
+        "snoozed_desc": "We will check again in 15 minutes."
+    },
+    "onboarding": {
+        "slide1": {
+            "title": "Daily Check-ins",
+            "description": "ImFine is a daily safety check. Just tap the button once a day to let us know you are okay."
+        },
+        "slide2": {
+            "title": "Grace Period",
+            "description": "Missed your time? Don’t panic. You have a 1-hour grace period to check in before we alert anyone."
+        },
+        "slide3": {
+            "title": "Trusted Contacts",
+            "description": "If you still don’t check in, we’ll alert your trusted contacts so they can check on you."
+        },
+        "next": "Next",
+        "get_started": "Get Started",
+        "skip": "Skip"
+    },
+    "ringtones": {
+        "default": {
+            "name": "Default Alert",
+            "desc": "Standard alarm sound"
+        },
+        "urgent": {
+            "name": "Urgent",
+            "desc": "More intense alert"
+        },
+        "gentle": {
+            "name": "Gentle",
+            "desc": "Softer alert option"
+        },
+        "siren": {
+            "name": "Siren",
+            "desc": "Emergency siren style"
+        },
+        "chime": {
+            "name": "Chime",
+            "desc": "Pleasant chime sound"
+        }
+    },
+    "home": {
+        "loading": "Loading status...",
+        "success_checkin": "You're confirmed for today.",
+        "vacation_desc": "Vacation mode is active. Disable it in Settings to resume check-ins.",
+        "grace_desc": "You missed your check-in time. Tap the button immediately to prevent alerting your contacts.",
+        "panic_active_desc": "You are checked in. Tap the red button if you need to immediately notify your contacts that you are not FINE.",
+        "active_desc": "Tap the button to confirm you're FINE.\n\nYour trusted contacts will be notified if you miss to check-in with them.",
+        "panic_modal_title": "⚠️ EMERGENCY ALERT",
+        "panic_modal_desc": "Are you sure? This will immediately notify your trusted contacts that you need help.",
+        "panic_modal_button": "SEND ALERT"
+    },
+    "auth": {
+        "login_title": "Welcome Back",
+        "signup_title": "Create Account",
+        "login_subtitle": "Sign in to continue",
+        "signup_subtitle": "Sign up to start your safety intervals",
+        "email_label": "Email Address",
+        "email_placeholder": "name@example.com",
+        "password_label": "Password",
+        "password_placeholder": "••••••••",
+        "login_button": "Sign In",
+        "signup_button": "Sign Up",
+        "already_account": "Already have an account? ",
+        "dont_have_account": "Don't have an account? ",
+        "verification_sent": "Verification email sent!",
+        "fill_fields": "Please fill in all fields",
+        "disclaimer": "By continuing, you agree to our Terms and Privacy Policy.\nThis app is not an emergency service."
+    }
+}

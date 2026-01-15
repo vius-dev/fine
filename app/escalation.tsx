@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { Button } from '../src/components/Button';
 import { Screen } from '../src/components/Screen';
@@ -9,6 +10,7 @@ import { Colors, Spacing, Typography } from '../src/theme';
 import { playRingtone, stopRingtone } from '../src/utils/audioPlayer';
 
 export default function EscalationScreen() {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const router = useRouter();
     const { profile } = useProfile();
@@ -49,10 +51,10 @@ export default function EscalationScreen() {
             const { error } = await api.resolveAlert();
             if (error) throw error;
 
-            Alert.alert('Resolved', 'Your contacts have been notified that you are safe.');
+            Alert.alert(t('escalation.resolved_title'), t('escalation.resolved_desc'));
             router.replace('/(tabs)');
         } catch (error: any) {
-            Alert.alert('Error', error.message);
+            Alert.alert(t('common.error'), error.message);
         } finally {
             setLoading(false);
         }
@@ -61,7 +63,7 @@ export default function EscalationScreen() {
     const handleSnooze = async () => {
         await stopRingtone();
         // Logic for snooze would go here (update DB to delay next check)
-        Alert.alert('Snoozed', 'We will check again in 15 minutes.');
+        Alert.alert(t('escalation.snoozed_title'), t('escalation.snoozed_desc'));
         router.replace('/(tabs)');
     };
 
@@ -72,14 +74,14 @@ export default function EscalationScreen() {
                     <Text style={styles.iconText}>!</Text>
                 </View>
 
-                <Text style={[Typography.h1, styles.title]}>Check-in Missed</Text>
+                <Text style={[Typography.h1, styles.title]}>{t('escalation.title')}</Text>
                 <Text style={[Typography.body, styles.subtitle]}>
-                    Your trusted contacts have been notified. Are you okay?
+                    {t('escalation.subtitle')}
                 </Text>
 
                 <View style={styles.actions}>
                     <Button
-                        title="I'M SAFE"
+                        title={t('escalation.resolve_button')}
                         onPress={handleImFine}
                         loading={loading}
                         style={styles.mainButton}
@@ -87,7 +89,7 @@ export default function EscalationScreen() {
                     />
 
                     <Button
-                        title="Snooze 15m"
+                        title={t('escalation.snooze')}
                         variant="outline"
                         onPress={handleSnooze}
                         style={styles.snoozeButton}

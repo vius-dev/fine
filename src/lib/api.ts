@@ -124,6 +124,20 @@ export const api = {
         return { data, error: null };
     },
 
+    updateContact: async (contactId: string, updates: { name?: string, destination?: string, channel?: string }) => {
+        return supabase
+            .from('contacts')
+            .update(updates)
+            .eq('id', contactId);
+    },
+
+    deleteContact: async (contactId: string) => {
+        return supabase
+            .from('contacts')
+            .delete()
+            .eq('id', contactId);
+    },
+
     resolveAlert: async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('Not authenticated');
@@ -182,5 +196,60 @@ export const api = {
             body: { contact_id: contactRecordId }
         });
         return { data, error };
+    },
+
+    sendTestAlert: async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+
+        const { data: profile } = await supabase
+            .from('users')
+            .select('id')
+            .eq('auth_user_id', user.id)
+            .single();
+
+        if (!profile) throw new Error('Profile not found');
+
+        const { error } = await supabase.functions.invoke('dispatch-notifications', {
+            body: {
+                user_id: profile.id,
+                type: 'TEST_ALERT'
+            }
+        });
+        return { error };
+    },
+
+    getNotificationHistory: async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+
+        const { data: profile } = await supabase
+            .from('users')
+            .select('id')
+            .eq('auth_user_id', user.id)
+            .single();
+
+        if (!profile) throw new Error('Profile not found');
+
+        // Fetch deliveries with event details
+        return supabase
+            .from('notification_deliveries')
+            .select(`
+                id,
+                channel,
+                destination,
+                delivered_at,
+                error,
+                created_at,
+                event:notification_events!inner(
+                    id,
+                    type,
+                    created_at,
+                    user_id
+                )
+            `)
+            .eq('event.user_id', profile.id)
+            .order('created_at', { ascending: false })
+            .limit(100);
     }
 };

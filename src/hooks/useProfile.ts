@@ -16,6 +16,7 @@ export type UserProfile = {
     ringtone_volume: number;
     reminder_enabled: boolean;
     reminder_offset_hours: number;
+    timezone?: string;
 };
 
 export const useProfile = () => {

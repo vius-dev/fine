@@ -4,7 +4,14 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { LogBox } from 'react-native';
 import 'react-native-reanimated';
+import '../src/i18n';
+
+// Ignore specific warning: expo-notifications functionality removed in Expo Go SDK 53
+LogBox.ignoreLogs([
+  'expo-notifications: Android Push notifications',
+]);
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { AuthProvider, useAuth } from '../src/hooks/useAuth';
@@ -51,6 +58,7 @@ export default function RootLayout() {
 }
 
 
+import { useTimezoneDetection } from '@/src/hooks/useTimezoneDetection';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState } from 'react';
 
@@ -64,6 +72,9 @@ function RootLayoutNav() {
 
   // Initialize notifications
   useNotifications();
+
+  // Initialize timezone detection
+  useTimezoneDetection();
 
   useEffect(() => {
     AsyncStorage.getItem('hasCompletedOnboarding')
@@ -83,17 +94,20 @@ function RootLayoutNav() {
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboardingGroup = segments[0] === 'onboarding';
 
-    if (!hasCompletedOnboarding && !inOnboardingGroup) {
-      // 1. If onboarding not done, force onboarding
-      router.replace('/onboarding');
-    } else if (hasCompletedOnboarding && !session && !inAuthGroup) {
-      // 2. If onboarding done but not logged in, go to login
-      router.replace('/(auth)/login');
-    } else if (session && (inAuthGroup || inOnboardingGroup)) {
-      // 3. If logged in but in auth/onboarding, go home
-      router.replace('/(tabs)');
+    if (!hasCompletedOnboarding) {
+      if (!inOnboardingGroup) {
+        router.replace('/onboarding');
+      }
+    } else if (!session) {
+      if (!inAuthGroup) {
+        router.replace('/(auth)/login');
+      }
+    } else if (session) {
+      if (inAuthGroup || inOnboardingGroup) {
+        router.replace('/(tabs)');
+      }
     }
-  }, [session, initialized, isReady, hasCompletedOnboarding, segments, router]);
+  }, [session, initialized, isReady, hasCompletedOnboarding, segments]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

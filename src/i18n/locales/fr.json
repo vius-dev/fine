@@ -1,0 +1,204 @@
+{
+    "welcome": "Bienvenue",
+    "status": {
+        "vacation": "MODE VACANCES",
+        "grace": "⚠️ PÉRIODE DE GRÂCE",
+        "active": "ACTIF",
+        "unknown": "STATUT INCONNU"
+    },
+    "action": {
+        "check_in": "Je vais bien",
+        "not_fine": "PAS BIEN",
+        "paused": "En pause"
+    },
+    "message": {
+        "action_required": "ACTION REQUISE",
+        "escalation_in": "Escalade dans",
+        "last_confirmed": "Dernière confirmation: {{time}}",
+        "no_checkins": "Aucun enregistrement encore",
+        "next_due": "Prochain enregistrement {{time}}",
+        "was_due": "Le prochain enregistrement était {{time}}",
+        "every_hours": "Toutes les {{hours}} heures"
+    },
+    "settings": {
+        "title": "Paramètres",
+        "language": "Langue",
+        "checkin_schedule": "Horaire d'enregistrement",
+        "checkin_schedule_desc": "À quelle fréquence voulez-vous vous enregistrer ?",
+        "reminders": "Rappels d'enregistrement",
+        "reminders_label": "Notifications de rappel",
+        "reminders_desc": "Être notifié quand l'enregistrement est dû",
+        "reminder_offset_label": "Délai de rappel",
+        "reminder_picker_due": "Quand l'enregistrement est dû",
+        "reminder_picker_before": "{{hours}} heure avant",
+        "reminder_picker_before_plural": "{{hours}} heures avant",
+        "escalation_alert": "Alerte d'escalade",
+        "escalation_sound_label": "Son d'alerte",
+        "escalation_sound_desc": "Jouer un son lors de l'escalade",
+        "system_check": "Vérification du système",
+        "transparency": "Transparence",
+        "timezone": "Fuseau horaire",
+        "account": "Compte",
+        "sign_out": "Se déconnecter",
+        "send_test": "Envoyer une alerte de test aux contacts",
+        "test_alert_confirm_title": "Confirmer le test",
+        "test_alert_confirm_desc": "Cela enverra une notification de test à tous vos contacts CONFIRMÉS. Ils seront informés qu'aucune action n'est requise.",
+        "test_alert_sent_title": "Envoyé",
+        "test_alert_sent_desc": "L'alerte de test a été envoyée à vos contacts.",
+        "system_check_desc": "Vérifiez que vos notifications fonctionnent.",
+        "stop_preview": "Arrêter l'aperçu",
+        "test_alert_sound": "Tester le son d'alerte",
+        "select_ringtone": "Sélectionner une sonnerie",
+        "volume": "Volume",
+        "set_to_12h": "Régler sur 12h",
+        "set_to_24h": "Régler sur 24h",
+        "remind_me": "Me rappeler",
+        "footer_version": "ImFine v1.0.0 (MVP)",
+        "view_notification_history": "Voir l'historique des notifications",
+        "view_notification_activity": "Voir votre activité de notification",
+        "current_timezone": "Actuel: {{timezone}}",
+        "timezone_description": "Votre fuseau horaire est détecté automatiquement. Si vous voyagez, vous serez invité à mettre à jour votre horaire d'enregistrement."
+    },
+    "common": {
+        "error": "Erreur",
+        "success": "Succès",
+        "cancel": "Annuler",
+        "confirm": "Confirmer",
+        "save": "Enregistrer",
+        "not_found_title": "Cette page n'existe pas.",
+        "go_home": "Aller à la page d'accueil !",
+        "modal_title": "Modal"
+    },
+    "contacts": {
+        "title": "Contacts de confiance",
+        "subtitle": "Ces personnes seront notifiées si vous manquez un enregistrement.",
+        "add_contact": "Ajouter un contact",
+        "edit_contact": "Modifier le contact",
+        "delete_contact": "Supprimer le contact",
+        "delete_confirmation": "Êtes-vous sûr de vouloir supprimer {{name}}? Ils ne seront plus notifiés si vous manquez un enregistrement.",
+        "name": "Nom",
+        "channel": "Canal",
+        "destination": "Destination",
+        "status_confirmed": "CONFIRMÉ",
+        "status_pending": "DEMANDE EN ATTENTE",
+        "resend_invite": "Renvoyer l'invitation",
+        "import_device_contact": "Importer un contact de l'appareil",
+        "no_contacts": "Aucun contact ajouté encore.",
+        "save": "Enregistrer",
+        "save_changes": "Enregistrer les modifications",
+        "cancel": "Annuler",
+        "linked_user_warning": "⚠️ Modifier la destination peut rompre le lien avec cet utilisateur ImFine.",
+        "error_fetch": "Échec de la récupération des contacts",
+        "fill_fields": "Veuillez remplir tous les champs",
+        "success_added": "Contact ajouté et invitation envoyée.",
+        "invite_sent": "Invitation envoyée avec succès.",
+        "error_invite": "Échec de l'envoi de l'invitation",
+        "success_updated": "Contact mis à jour avec succès.",
+        "success_deleted": "Contact supprimé avec succès.",
+        "error_delete": "Échec de la suppression du contact",
+        "permission_denied": "Permission refusée",
+        "access_denied_desc": "L'accès aux contacts a été refusé. Veuillez saisir les détails manuellement.",
+        "no_contacts_device": "Aucun contact trouvé sur cet appareil.",
+        "error_access_contacts": "Échec de l'accès aux contacts.",
+        "invalid_contact": "Contact invalide",
+        "invalid_contact_desc": "Ce contact n'a ni numéro de téléphone ni e-mail.",
+        "has_app": "✓ Possède ImFine",
+        "push_label": "Jeton Push",
+        "email_label": "Adresse e-mail",
+        "phone_label": "Numéro de téléphone"
+    },
+    "notification_history": {
+        "title": "Historique des notifications",
+        "subtitle": "Chronologie de toutes les notifications envoyées à vos contacts",
+        "back": "← Retour",
+        "empty_title": "Aucune notification envoyée encore",
+        "empty_subtitle": "Les notifications apparaîtront ici lorsque vous manquez un enregistrement ou envoyez une alerte de test",
+        "event_escalation": "ALERTE D'ESCALADE",
+        "event_resolution": "ALERTE DE RÉSOLUTION",
+        "event_test": "ALERTE DE TEST",
+        "event_contact_request": "DEMANDE DE CONTACT",
+        "status_delivered": "✅ Livré",
+        "status_failed": "❌ Échoué",
+        "status_pending": "⏳ En attente",
+        "sent_to": "Envoyé {{channel}} à {{destination}}",
+        "error_fetch": "Échec de la récupération de l'historique des notifications"
+    },
+    "escalation": {
+        "title": "Alerte d'urgence active",
+        "subtitle": "Vos contacts ont été notifiés",
+        "resolve_button": "Je suis en sécurité maintenant",
+        "description": "Vous avez manqué votre enregistrement et la période de grâce a expiré. Vos contacts de confiance ont été alertés.",
+        "snooze": "Rappeler dans 15m",
+        "resolved_title": "Résolu",
+        "resolved_desc": "Vos contacts ont été informés que vous êtes en sécurité.",
+        "snoozed_title": "Reporté",
+        "snoozed_desc": "Nous vérifierons à nouveau dans 15 minutes."
+    },
+    "onboarding": {
+        "slide1": {
+            "title": "Enregistrements quotidiens",
+            "description": "ImFine est un contrôle de sécurité quotidien. Appuyez simplement sur le bouton une fois par jour pour nous faire savoir que vous allez bien."
+        },
+        "slide2": {
+            "title": "Période de grâce",
+            "description": "Vous avez manqué votre heure? Pas de panique. Vous avez une période de grâce d'1 heure pour vous enregistrer avant que nous alertions quelqu'un."
+        },
+        "slide3": {
+            "title": "Contacts de confiance",
+            "description": "Si vous ne vous enregistrez toujours pas, nous alerterons vos contacts de confiance afin qu'ils puissent vérifier comment vous allez."
+        },
+        "next": "Suivant",
+        "get_started": "Commencer",
+        "skip": "Passer"
+    },
+    "ringtones": {
+        "default": {
+            "name": "Alerte par défaut",
+            "desc": "Son d'alarme standard"
+        },
+        "urgent": {
+            "name": "Urgent",
+            "desc": "Alerte plus intense"
+        },
+        "gentle": {
+            "name": "Doux",
+            "desc": "Option d'alerte plus douce"
+        },
+        "siren": {
+            "name": "Sirène",
+            "desc": "Style sirène d'urgence"
+        },
+        "chime": {
+            "name": "Carillon",
+            "desc": "Son de carillon agréable"
+        }
+    },
+    "home": {
+        "loading": "Chargement du statut...",
+        "success_checkin": "Vous êtes confirmé pour aujourd'hui.",
+        "vacation_desc": "Le mode vacances est actif. Désactivez-le dans les paramètres pour reprendre les enregistrements.",
+        "grace_desc": "Vous avez manqué votre heure d'enregistrement. Appuyez immédiatement sur le bouton pour éviter d'alerter vos contacts.",
+        "panic_active_desc": "Vous êtes enregistré. Appuyez sur le bouton rouge si vous devez avertir immédiatement vos contacts que vous n'allez PAS BIEN.",
+        "active_desc": "Appuyez sur le bouton pour confirmer que vous allez BIEN.\n\nVos contacts de confiance seront avertis si vous oubliez de vous enregistrer.",
+        "panic_modal_title": "⚠️ ALERTE D'URGENCE",
+        "panic_modal_desc": "Êtes-vous sûr ? Cela avertira immédiatement vos contacts de confiance que vous avez besoin d'aide.",
+        "panic_modal_button": "ENVOYER L'ALERTE"
+    },
+    "auth": {
+        "login_title": "Bon retour",
+        "signup_title": "Créer un compte",
+        "login_subtitle": "Connectez-vous pour continuer",
+        "signup_subtitle": "Inscrivez-vous pour lancer vos intervalles de sécurité",
+        "email_label": "Adresse e-mail",
+        "email_placeholder": "nom@exemple.com",
+        "password_label": "Mot de passe",
+        "password_placeholder": "••••••••",
+        "login_button": "Se connecter",
+        "signup_button": "S'inscrire",
+        "already_account": "Vous avez déjà un compte ? ",
+        "dont_have_account": "Vous n'avez pas de compte ? ",
+        "verification_sent": "E-mail de vérification envoyé !",
+        "fill_fields": "Veuillez remplir tous les champs",
+        "disclaimer": "En continuant, vous acceptez nos conditions et notre politique de confidentialité.\nCette application n'est pas un service d'urgence."
+    }
+}

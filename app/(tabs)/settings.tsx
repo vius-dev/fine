@@ -1,5 +1,7 @@
 import Slider from '@react-native-community/slider';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { Button } from '../../src/components/Button';
 import { Screen } from '../../src/components/Screen';
@@ -11,6 +13,8 @@ import { Colors, Spacing, Typography } from '../../src/theme';
 import { RINGTONE_OPTIONS, previewRingtone, stopRingtone } from '../../src/utils/audioPlayer';
 
 export default function SettingsScreen() {
+    const router = useRouter();
+    const { t, i18n } = useTranslation(); // Use hook
     const { profile, refetch } = useProfile();
     const { session } = useAuth();
     const [isPlayingPreview, setIsPlayingPreview] = useState(false);
@@ -21,7 +25,7 @@ export default function SettingsScreen() {
             if (error) throw error;
             refetch();
         } catch (error: any) {
-            Alert.alert('Error', error.message);
+            Alert.alert(t('common.error'), error.message);
         }
     };
 
@@ -31,7 +35,7 @@ export default function SettingsScreen() {
             if (error) throw error;
             refetch();
         } catch (error: any) {
-            Alert.alert('Error', error.message);
+            Alert.alert(t('common.error'), error.message);
         }
     };
 
@@ -44,7 +48,7 @@ export default function SettingsScreen() {
             // Preview the selected ringtone
             await handlePreviewRingtone(ringtoneId);
         } catch (error: any) {
-            Alert.alert('Error', error.message);
+            Alert.alert(t('common.error'), error.message);
         }
     };
 
@@ -54,7 +58,7 @@ export default function SettingsScreen() {
             if (error) throw error;
             refetch();
         } catch (error: any) {
-            Alert.alert('Error', error.message);
+            Alert.alert(t('common.error'), error.message);
         }
     };
 
@@ -80,6 +84,28 @@ export default function SettingsScreen() {
         setIsPlayingPreview(false);
     };
 
+    const handleSendTestAlert = async () => {
+        Alert.alert(
+            t('settings.test_alert_confirm_title'),
+            t('settings.test_alert_confirm_desc'),
+            [
+                { text: t('common.cancel'), style: 'cancel' },
+                {
+                    text: t('settings.send_test'),
+                    onPress: async () => {
+                        try {
+                            const { error } = await api.sendTestAlert();
+                            if (error) throw error;
+                            Alert.alert(t('settings.test_alert_sent_title'), t('settings.test_alert_sent_desc'));
+                        } catch (error: any) {
+                            Alert.alert(t('common.error'), error.message);
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
     const handleLogout = async () => {
         await supabase.auth.signOut();
     };
@@ -91,7 +117,7 @@ export default function SettingsScreen() {
     return (
         <Screen style={styles.container}>
             <View style={styles.header}>
-                <Text style={Typography.h1}>Settings</Text>
+                <Text style={Typography.h1}>{t('settings.title')}</Text>
             </View>
 
             <ScrollView contentContainerStyle={styles.content}>
@@ -113,12 +139,28 @@ export default function SettingsScreen() {
                 */}
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Check-in Schedule</Text>
-                    <Text style={styles.description}>How often do you want to check in?</Text>
+                    <Text style={styles.sectionTitle}>{t('settings.language')}</Text>
+                    <View style={styles.row}>
+                        {['en', 'es', 'fr', 'de'].map((lang) => (
+                            <Button
+                                key={lang}
+                                title={lang.toUpperCase()}
+                                variant={i18n.language === lang ? 'primary' : 'outline'}
+                                size="small"
+                                onPress={() => i18n.changeLanguage(lang)}
+                                style={{ flex: 1, marginHorizontal: 4 }}
+                            />
+                        ))}
+                    </View>
+                </View>
+
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>{t('settings.checkin_schedule')}</Text>
+                    <Text style={styles.description}>{t('settings.checkin_schedule_desc')}</Text>
 
                     <View style={[styles.row, { marginTop: Spacing.md }]}>
                         <View style={styles.textColumn}>
-                            <Text style={styles.label}>Every {profile?.checkin_interval_hours || 24} hours</Text>
+                            <Text style={styles.label}>{t('message.every_hours', { hours: profile?.checkin_interval_hours || 24 })}</Text>
                         </View>
                         <View style={{ flexDirection: 'row', gap: Spacing.sm }}>
                             <Button
@@ -145,14 +187,14 @@ export default function SettingsScreen() {
                     </View>
                     <View style={[styles.row, { marginTop: Spacing.xs }]}>
                         <Button
-                            title="Set to 12h"
+                            title={t('settings.set_to_12h')}
                             variant="secondary"
                             onPress={() => api.updateProfile({ checkin_interval_hours: 12 }).then(() => refetch())}
                             style={{ flex: 1, marginRight: 8 }}
                             textStyle={{ fontSize: 12 }}
                         />
                         <Button
-                            title="Set to 24h"
+                            title={t('settings.set_to_24h')}
                             variant="secondary"
                             onPress={() => api.updateProfile({ checkin_interval_hours: 24 }).then(() => refetch())}
                             style={{ flex: 1 }}
@@ -162,12 +204,12 @@ export default function SettingsScreen() {
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Check-in Reminders</Text>
+                    <Text style={styles.sectionTitle}>{t('settings.reminders')}</Text>
 
                     <View style={styles.row}>
                         <View style={styles.textColumn}>
-                            <Text style={styles.label}>Reminder Notifications</Text>
-                            <Text style={styles.description}>Get notified when check-in is due</Text>
+                            <Text style={styles.label}>{t('settings.reminders_label')}</Text>
+                            <Text style={styles.description}>{t('settings.reminders_desc')}</Text>
                         </View>
                         <Switch
                             value={profile?.reminder_enabled ?? true}
@@ -177,7 +219,7 @@ export default function SettingsScreen() {
                                     if (error) throw error;
                                     refetch();
                                 } catch (error: any) {
-                                    Alert.alert('Error', error.message);
+                                    Alert.alert(t('common.error'), error.message);
                                 }
                             }}
                             trackColor={{ false: Colors.border, true: Colors.primary }}
@@ -186,18 +228,18 @@ export default function SettingsScreen() {
 
                     {(profile?.reminder_enabled ?? true) && (
                         <View style={{ marginTop: Spacing.md }}>
-                            <Text style={[styles.label, { marginBottom: Spacing.sm }]}>Remind me</Text>
+                            <Text style={[styles.label, { marginBottom: Spacing.sm }]}>{t('settings.remind_me')}</Text>
                             {(() => {
                                 const interval = profile?.checkin_interval_hours || 24;
                                 const options = [
-                                    { label: 'When check-in is due', value: 0 },
+                                    { label: t('settings.reminder_picker_due'), value: 0 },
                                 ];
 
                                 // Only show options that are less than the check-in interval
-                                if (interval > 1) options.push({ label: '1 hour before', value: 1 });
-                                if (interval > 2) options.push({ label: '2 hours before', value: 2 });
-                                if (interval > 4) options.push({ label: '4 hours before', value: 4 });
-                                if (interval > 12) options.push({ label: '12 hours before', value: 12 });
+                                if (interval > 1) options.push({ label: t('settings.reminder_picker_before', { hours: 1 }), value: 1 });
+                                if (interval > 2) options.push({ label: t('settings.reminder_picker_before_plural', { hours: 2 }), value: 2 });
+                                if (interval > 4) options.push({ label: t('settings.reminder_picker_before_plural', { hours: 4 }), value: 4 });
+                                if (interval > 12) options.push({ label: t('settings.reminder_picker_before_plural', { hours: 12 }), value: 12 });
 
                                 return options.map((option) => (
                                     <TouchableOpacity
@@ -212,7 +254,7 @@ export default function SettingsScreen() {
                                                 if (error) throw error;
                                                 refetch();
                                             } catch (error: any) {
-                                                Alert.alert('Error', error.message);
+                                                Alert.alert(t('common.error'), error.message);
                                             }
                                         }}
                                     >
@@ -230,13 +272,13 @@ export default function SettingsScreen() {
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Escalation Alert</Text>
+                    <Text style={styles.sectionTitle}>{t('settings.escalation_alert')}</Text>
 
                     {/* Enable/Disable Ringtone */}
                     <View style={styles.row}>
                         <View style={styles.textColumn}>
-                            <Text style={styles.label}>Alert Sound</Text>
-                            <Text style={styles.description}>Play sound when escalated</Text>
+                            <Text style={styles.label}>{t('settings.escalation_sound_label')}</Text>
+                            <Text style={styles.description}>{t('settings.escalation_sound_desc')}</Text>
                         </View>
                         <Switch
                             value={ringtoneEnabled}
@@ -249,7 +291,7 @@ export default function SettingsScreen() {
                         <>
                             {/* Ringtone Selection */}
                             <View style={{ marginTop: Spacing.md }}>
-                                <Text style={[styles.label, { marginBottom: Spacing.sm }]}>Select Ringtone</Text>
+                                <Text style={[styles.label, { marginBottom: Spacing.sm }]}>{t('settings.select_ringtone')}</Text>
                                 {RINGTONE_OPTIONS.map((ringtone) => (
                                     <TouchableOpacity
                                         key={ringtone.id}
@@ -265,8 +307,8 @@ export default function SettingsScreen() {
                                             )}
                                         </View>
                                         <View style={styles.textColumn}>
-                                            <Text style={styles.label}>{ringtone.name}</Text>
-                                            <Text style={styles.description}>{ringtone.description}</Text>
+                                            <Text style={styles.label}>{t(`ringtones.${ringtone.id}.name`)}</Text>
+                                            <Text style={styles.description}>{t(`ringtones.${ringtone.id}.desc`)}</Text>
                                         </View>
                                     </TouchableOpacity>
                                 ))}
@@ -275,7 +317,7 @@ export default function SettingsScreen() {
                             {/* Volume Control */}
                             <View style={{ marginTop: Spacing.md }}>
                                 <View style={styles.row}>
-                                    <Text style={styles.label}>Volume</Text>
+                                    <Text style={styles.label}>{t('settings.volume')}</Text>
                                     <Text style={styles.label}>{ringtoneVolume}%</Text>
                                 </View>
                                 <Slider
@@ -293,7 +335,7 @@ export default function SettingsScreen() {
 
                             {/* Test Button */}
                             <Button
-                                title={isPlayingPreview ? "Stop Preview" : "Test Alert Sound"}
+                                title={isPlayingPreview ? t('settings.stop_preview') : t('settings.test_alert_sound')}
                                 variant={isPlayingPreview ? "secondary" : "outline"}
                                 onPress={isPlayingPreview ? handleStopPreview : () => handlePreviewRingtone()}
                                 style={{ marginTop: Spacing.md }}
@@ -303,10 +345,42 @@ export default function SettingsScreen() {
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Account</Text>
+                    <Text style={styles.sectionTitle}>{t('settings.system_check')}</Text>
+                    <Text style={styles.description}>{t('settings.system_check_desc')}</Text>
+                    <Button
+                        title={t('settings.send_test')}
+                        variant="outline"
+                        onPress={handleSendTestAlert}
+                        style={{ marginTop: Spacing.md }}
+                    />
+                </View>
+
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>{t('settings.transparency')}</Text>
+                    <Text style={styles.description}>{t('settings.view_notification_activity')}</Text>
+                    <Button
+                        title={t('settings.view_notification_history')}
+                        variant="outline"
+                        onPress={() => router.push('/notification-history' as any)}
+                        style={{ marginTop: Spacing.md }}
+                    />
+                </View>
+
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>{t('settings.timezone')}</Text>
+                    <Text style={styles.description}>
+                        {t('settings.current_timezone', { timezone: profile?.timezone || t('status.unknown') })}
+                    </Text>
+                    <Text style={[styles.description, { marginTop: Spacing.xs, fontSize: 11 }]}>
+                        {t('settings.timezone_description')}
+                    </Text>
+                </View>
+
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>{t('settings.account')}</Text>
                     <Text style={styles.email}>{session?.user?.email}</Text>
                     <Button
-                        title="Sign Out"
+                        title={t('settings.sign_out')}
                         variant="secondary"
                         onPress={handleLogout}
                         style={styles.logoutButton}
@@ -314,7 +388,7 @@ export default function SettingsScreen() {
                 </View>
             </ScrollView>
 
-            <Text style={styles.version}>ImFine v1.0.0 (MVP)</Text>
+            <Text style={styles.version}>{t('settings.footer_version')}</Text>
         </Screen>
     );
 }
@@ -337,7 +411,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         ...Typography.h2,
-        fontSize: 18,
+        fontSize: 16,
         marginBottom: Spacing.md,
         color: Colors.text,
     },

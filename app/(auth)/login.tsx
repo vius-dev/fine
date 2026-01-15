@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Button } from '../../src/components/Button';
 import { Screen } from '../../src/components/Screen';
@@ -8,6 +9,7 @@ import { supabase } from '../../src/lib/supabase';
 import { Colors, Spacing, Typography } from '../../src/theme';
 
 export default function LoginScreen() {
+    const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -16,7 +18,7 @@ export default function LoginScreen() {
 
     const handleAuth = async () => {
         if (!email || !password) {
-            Alert.alert('Error', 'Please fill in all fields');
+            Alert.alert(t('common.error'), t('auth.fill_fields'));
             return;
         }
 
@@ -28,7 +30,7 @@ export default function LoginScreen() {
                     password
                 });
                 if (error) throw error;
-                Alert.alert('Success', 'Verification email sent!');
+                Alert.alert(t('common.success'), t('auth.verification_sent'));
             } else {
                 const { error } = await supabase.auth.signInWithPassword({
                     email,
@@ -38,7 +40,7 @@ export default function LoginScreen() {
                 router.replace('/(tabs)');
             }
         } catch (error: any) {
-            Alert.alert('Error', error.message);
+            Alert.alert(t('common.error'), error.message);
         } finally {
             setLoading(false);
         }
@@ -52,30 +54,30 @@ export default function LoginScreen() {
             >
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <View style={styles.header}>
-                        <Text style={Typography.h1}>{isSignUp ? 'Create Account' : 'Welcome Back'}</Text>
+                        <Text style={Typography.h1}>{isSignUp ? t('auth.signup_title') : t('auth.login_title')}</Text>
                         <Text style={[Typography.body, styles.subtitle]}>
-                            {isSignUp ? 'Sign up to start your safety intervals' : 'Sign in to continue'}
+                            {isSignUp ? t('auth.signup_subtitle') : t('auth.login_subtitle')}
                         </Text>
                     </View>
 
                     <View style={styles.form}>
                         <TextInput
-                            label="Email Address"
+                            label={t('auth.email_label')}
                             value={email}
                             onChangeText={setEmail}
-                            placeholder="name@example.com"
+                            placeholder={t('auth.email_placeholder')}
                             keyboardType="email-address"
                         />
                         <TextInput
-                            label="Password"
+                            label={t('auth.password_label')}
                             value={password}
                             onChangeText={setPassword}
-                            placeholder="••••••••"
+                            placeholder={t('auth.password_placeholder')}
                             secureTextEntry
                         />
 
                         <Button
-                            title={isSignUp ? 'Sign Up' : 'Sign In'}
+                            title={isSignUp ? t('auth.signup_button') : t('auth.login_button')}
                             onPress={handleAuth}
                             loading={loading}
                             style={styles.authButton}
@@ -86,9 +88,9 @@ export default function LoginScreen() {
                             style={styles.switchContainer}
                         >
                             <Text style={Typography.body}>
-                                {isSignUp ? 'Already have an account? ' : 'Don\'t have an account? '}
+                                {isSignUp ? t('auth.already_account') : t('auth.dont_have_account')}
                                 <Text style={styles.switchText}>
-                                    {isSignUp ? 'Sign In' : 'Sign Up'}
+                                    {isSignUp ? t('auth.login_button') : t('auth.signup_button')}
                                 </Text>
                             </Text>
                         </TouchableOpacity>
@@ -96,8 +98,7 @@ export default function LoginScreen() {
 
                     <View style={styles.footer}>
                         <Text style={styles.disclaimer}>
-                            By continuing, you agree to our Terms and Privacy Policy.
-                            This app is not an emergency service.
+                            {t('auth.disclaimer')}
                         </Text>
                     </View>
                 </ScrollView>

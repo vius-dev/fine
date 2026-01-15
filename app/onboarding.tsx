@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import { Button } from '../src/components/Button';
 import { Screen } from '../src/components/Screen';
@@ -8,27 +9,28 @@ import { Colors, Spacing, Typography } from '../src/theme';
 
 const { width } = Dimensions.get('window');
 
-const SLIDES = [
-    {
-        title: 'Daily Check-ins',
-        description: 'ImFine is a daily safety check. Just tap the button once a day to let us know you are okay.',
-        icon: '✅',
-    },
-    {
-        title: 'Grace Period',
-        description: 'Missed your time? Don’t panic. You have a 1-hour grace period to check in before we alert anyone.',
-        icon: '⏳',
-    },
-    {
-        title: 'Trusted Contacts',
-        description: 'If you still don’t check in, we’ll alert your trusted contacts so they can check on you.',
-        icon: '🛡️',
-    },
-];
-
 export default function OnboardingScreen() {
+    const { t } = useTranslation();
     const [currentIndex, setCurrentIndex] = useState(0);
     const router = useRouter();
+
+    const SLIDES = [
+        {
+            title: t('onboarding.slide1.title'),
+            description: t('onboarding.slide1.description'),
+            icon: '✅',
+        },
+        {
+            title: t('onboarding.slide2.title'),
+            description: t('onboarding.slide2.description'),
+            icon: '⏳',
+        },
+        {
+            title: t('onboarding.slide3.title'),
+            description: t('onboarding.slide3.description'),
+            icon: '🛡️',
+        },
+    ];
 
     const handleNext = () => {
         if (currentIndex < SLIDES.length - 1) {
@@ -71,14 +73,14 @@ export default function OnboardingScreen() {
 
             <View style={styles.footer}>
                 <Button
-                    title={currentIndex === SLIDES.length - 1 ? "Get Started" : "Next"}
+                    title={currentIndex === SLIDES.length - 1 ? t('onboarding.get_started') : t('onboarding.next')}
                     onPress={handleNext}
                     size="large"
                     style={styles.button}
                 />
                 {currentIndex < SLIDES.length - 1 && (
                     <Button
-                        title="Skip"
+                        title={t('onboarding.skip')}
                         variant="text"
                         onPress={handleComplete}
                         style={styles.skipButton}
