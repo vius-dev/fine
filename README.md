@@ -1,4 +1,4 @@
-# FineApp (formerly ImFine)
+# FineApp
 
 **FineApp** is a low-friction personal safety application designed to provide peace of mind for people living alone, remote workers, and anyone who wants a safety net. It allows users to periodically confirm they are "fine". If a check-in is missed, the system automatically notifies trusted contacts.
 
@@ -41,14 +41,8 @@
     npm install
     ```
 
-3.  **Environment Setup**:
-    Create a `.env` file in the root directory with your Supabase credentials:
-    ```env
-    EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
-    EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-    ```
 
-4.  **Run the App**:
+3.  **Run the App**:
     ```bash
     npx expo start
     ```
@@ -56,25 +50,7 @@
 
 ### Backend Setup (Supabase)
 
-This project relies on Supabase for the database and edge functions.
 
-1.  **Link Project**: `npx supabase link --project-ref <your-project-id>`
-2.  **Apply Migrations**: `npx supabase db push`
-3.  **Deploy Functions**: `npx supabase functions deploy`
-
-## 📱 Build for Device
-
-To create a standalone APK for Android:
-
-```bash
-# Install EAS CLI
-npm install -g eas-cli
-
-# Login
-eas login
-
-# Build APK (Preview Profile)
-eas build -p android --profile preview
 ```
 
 ## 📄 License
