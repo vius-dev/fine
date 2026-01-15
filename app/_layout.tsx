@@ -30,6 +30,8 @@ export const unstable_settings = {
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
+import { OnboardingProvider, useOnboarding } from '../src/hooks/useOnboarding';
+
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -52,23 +54,24 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <RootLayoutNav />
+      <OnboardingProvider>
+        <RootLayoutNav />
+      </OnboardingProvider>
     </AuthProvider>
   );
 }
 
 
 import { useTimezoneDetection } from '@/src/hooks/useTimezoneDetection';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState } from 'react';
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const { session, initialized } = useAuth();
+  const { hasCompletedOnboarding } = useOnboarding();
   const segments = useSegments();
   const router = useRouter();
   const [isReady, setIsReady] = useState(false);
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(null);
 
   // Initialize notifications
   useNotifications();
@@ -76,38 +79,47 @@ function RootLayoutNav() {
   // Initialize timezone detection
   useTimezoneDetection();
 
+  // Simple readiness check - wait for both auth and onboarding to load
   useEffect(() => {
-    AsyncStorage.getItem('hasCompletedOnboarding')
-      .then(value => {
-        setHasCompletedOnboarding(value === 'true');
-        setIsReady(true);
-      })
-      .catch(() => {
-        setHasCompletedOnboarding(false);
-        setIsReady(true);
-      });
-  }, []);
+    if (initialized && hasCompletedOnboarding !== null) {
+      setIsReady(true);
+    }
+  }, [initialized, hasCompletedOnboarding]);
 
   useEffect(() => {
-    if (!initialized || !isReady) return;
+    if (!isReady) return;
 
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboardingGroup = segments[0] === 'onboarding';
 
     if (!hasCompletedOnboarding) {
+      // If we haven't completed onboarding, always go to onboarding
       if (!inOnboardingGroup) {
         router.replace('/onboarding');
       }
-    } else if (!session) {
-      if (!inAuthGroup) {
-        router.replace('/(auth)/login');
-      }
-    } else if (session) {
-      if (inAuthGroup || inOnboardingGroup) {
-        router.replace('/(tabs)');
+    } else {
+      // Onboarding is complete
+      if (inOnboardingGroup) {
+        // If we are still in onboarding group loop, get out
+        // Determine where to go based on auth
+        if (!session) {
+          router.replace('/(auth)/login');
+        } else {
+          router.replace('/(tabs)');
+        }
+      } else if (!session) {
+        // Not in onboarding, no session -> login
+        if (!inAuthGroup) {
+          router.replace('/(auth)/login');
+        }
+      } else if (session) {
+        // Has session -> tabs
+        if (inAuthGroup) {
+          router.replace('/(tabs)');
+        }
       }
     }
-  }, [session, initialized, isReady, hasCompletedOnboarding, segments]);
+  }, [session, isReady, hasCompletedOnboarding, segments]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

@@ -1,10 +1,10 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import { Button } from '../src/components/Button';
 import { Screen } from '../src/components/Screen';
+import { useOnboarding } from '../src/hooks/useOnboarding';
 import { Colors, Spacing, Typography } from '../src/theme';
 
 const { width } = Dimensions.get('window');
@@ -13,6 +13,7 @@ export default function OnboardingScreen() {
     const { t } = useTranslation();
     const [currentIndex, setCurrentIndex] = useState(0);
     const router = useRouter();
+    const { completeOnboarding } = useOnboarding();
 
     const SLIDES = [
         {
@@ -42,10 +43,13 @@ export default function OnboardingScreen() {
 
     const handleComplete = async () => {
         try {
-            await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
-            router.replace('/(auth)/login');
+            // Update state globally - this will trigger the redirect in _layout.tsx
+            await completeOnboarding();
+            // No need to manually replace route, the effect in _layout.tsx will handle it
+            // checking 'hasCompletedOnboarding' which will now be true.
+            // But just in case of race/delay, we can let the effect do the job.
         } catch (error) {
-            console.error('Failed to save onboarding state:', error);
+            console.error('Failed to complete onboarding:', error);
         }
     };
 

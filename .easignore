@@ -1,0 +1,5 @@
+prd.md
+.agent/
+.agent
+.env
+supabase/migrations/
