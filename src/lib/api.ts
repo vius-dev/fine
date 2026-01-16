@@ -195,14 +195,47 @@ export const api = {
     },
 
     inviteContact: async (contactId: string) => {
+        // Check if user is authenticated
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            console.error('No active session when trying to invite contact');
+            return { error: new Error('Not authenticated. Please log in again.') };
+        }
+
+        console.log('Invoking invite-contact with session:', session.user.email);
+        console.log('Access token:', session.access_token.substring(0, 20) + '...');
+
+        // Explicitly pass the Authorization header
         const { data, error } = await supabase.functions.invoke('invite-contact', {
-            body: { contact_id: contactId }
+            body: { contact_id: contactId },
+            headers: {
+                Authorization: `Bearer ${session.access_token}`
+            }
         });
 
         // Check for network/invocation errors
         if (error) {
             console.error('Invite contact error:', error);
-            return { error };
+
+            // Try to extract the response body for more details
+            try {
+                const errorContext = (error as any).context;
+                if (errorContext?._bodyInit?._data) {
+                    console.log('Error response body available');
+                }
+
+                // Log the full error for debugging
+                console.error('Full error object:', {
+                    name: error.name,
+                    message: error.message,
+                    status: errorContext?.status,
+                });
+            } catch (e) {
+                console.error('Could not parse error details');
+            }
+
+            const errorMessage = error.message || 'Edge Function returned a non-2xx status code';
+            return { error: new Error(errorMessage) };
         }
 
         // Check if the edge function returned an error in the response data

@@ -2,7 +2,7 @@ import Slider from '@react-native-community/slider';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next'; // Import useTranslation
-import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { Button } from '../../src/components/Button';
 import { Screen } from '../../src/components/Screen';
 import { useAuth } from '../../src/hooks/useAuth';
@@ -18,6 +18,7 @@ export default function SettingsScreen() {
     const { profile, refetch } = useProfile();
     const { session } = useAuth();
     const [isPlayingPreview, setIsPlayingPreview] = useState(false);
+    const [intervalModalVisible, setIntervalModalVisible] = useState(false);
 
     const handleUpdateVacationMode = async (value: boolean) => {
         try {
@@ -154,49 +155,18 @@ export default function SettingsScreen() {
                     <Text style={styles.sectionTitle}>{t('settings.checkin_schedule')}</Text>
                     <Text style={styles.description}>{t('settings.checkin_schedule_desc')}</Text>
 
-                    <View style={[styles.row, { marginTop: Spacing.md }]}>
+                    <TouchableOpacity
+                        style={styles.intervalSelector}
+                        onPress={() => setIntervalModalVisible(true)}
+                    >
                         <View style={styles.textColumn}>
-                            <Text style={styles.label}>{t('message.every_hours', { hours: profile?.checkin_interval_hours || 24 })}</Text>
+                            <Text style={styles.label}>Check-in Interval</Text>
+                            <Text style={styles.intervalValue}>
+                                {t('message.every_hours', { hours: profile?.checkin_interval_hours || 24 })}
+                            </Text>
                         </View>
-                        <View style={{ flexDirection: 'row', gap: Spacing.sm }}>
-                            <Button
-                                title="-"
-                                variant="outline"
-                                onPress={() => {
-                                    const current = profile?.checkin_interval_hours || 24;
-                                    if (current > 1) {
-                                        api.updateProfile({ checkin_interval_hours: current - 1 }).then(() => refetch());
-                                    }
-                                }}
-                                style={styles.stepperButton}
-                            />
-                            <Button
-                                title="+"
-                                variant="outline"
-                                onPress={() => {
-                                    const current = profile?.checkin_interval_hours || 24;
-                                    api.updateProfile({ checkin_interval_hours: current + 1 }).then(() => refetch());
-                                }}
-                                style={styles.stepperButton}
-                            />
-                        </View>
-                    </View>
-                    <View style={[styles.row, { marginTop: Spacing.xs }]}>
-                        <Button
-                            title={t('settings.set_to_12h')}
-                            variant="secondary"
-                            onPress={() => api.updateProfile({ checkin_interval_hours: 12 }).then(() => refetch())}
-                            style={{ flex: 1, marginRight: 8 }}
-                            textStyle={{ fontSize: 12 }}
-                        />
-                        <Button
-                            title={t('settings.set_to_24h')}
-                            variant="secondary"
-                            onPress={() => api.updateProfile({ checkin_interval_hours: 24 }).then(() => refetch())}
-                            style={{ flex: 1 }}
-                            textStyle={{ fontSize: 12 }}
-                        />
-                    </View>
+                        <Text style={styles.chevron}>›</Text>
+                    </TouchableOpacity>
                 </View>
 
                 <View style={styles.section}>
@@ -384,6 +354,59 @@ export default function SettingsScreen() {
                     <Text style={styles.version}>{t('settings.footer_version')}</Text>
                 </View>
             </ScrollView>
+
+            {/* Interval Selection Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={intervalModalVisible}
+                onRequestClose={() => setIntervalModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalView}>
+                        <Text style={[Typography.h2, { marginBottom: Spacing.md }]}>Check-in Interval</Text>
+                        <Text style={[styles.description, { marginBottom: Spacing.lg }]}>
+                            How often do you want to check in?
+                        </Text>
+
+                        {[1, 4, 8, 12, 24, 48].map((hours) => (
+                            <TouchableOpacity
+                                key={hours}
+                                style={[
+                                    styles.intervalOption,
+                                    (profile?.checkin_interval_hours === hours) && styles.intervalOptionSelected
+                                ]}
+                                onPress={async () => {
+                                    try {
+                                        const { error } = await api.updateProfile({ checkin_interval_hours: hours });
+                                        if (error) throw error;
+                                        refetch();
+                                        setIntervalModalVisible(false);
+                                    } catch (error: any) {
+                                        Alert.alert(t('common.error'), error.message);
+                                    }
+                                }}
+                            >
+                                <View style={styles.radioButton}>
+                                    {(profile?.checkin_interval_hours === hours) && (
+                                        <View style={styles.radioButtonInner} />
+                                    )}
+                                </View>
+                                <Text style={styles.label}>
+                                    {hours === 1 ? '1 hour' : `${hours} hours`}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+
+                        <Button
+                            title="Cancel"
+                            variant="outline"
+                            onPress={() => setIntervalModalVisible(false)}
+                            style={{ marginTop: Spacing.md }}
+                        />
+                    </View>
+                </View>
+            </Modal>
         </Screen>
     );
 }
@@ -483,5 +506,60 @@ const styles = StyleSheet.create({
         height: 10,
         borderRadius: 5,
         backgroundColor: Colors.primary,
+    },
+    intervalSelector: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: Spacing.md,
+        backgroundColor: Colors.background,
+        borderRadius: 8,
+        marginTop: Spacing.md,
+        borderWidth: 1,
+        borderColor: Colors.border,
+    },
+    intervalValue: {
+        ...Typography.body,
+        color: Colors.primary,
+        fontWeight: '600',
+        marginTop: 4,
+    },
+    chevron: {
+        fontSize: 24,
+        color: Colors.textSecondary,
+        fontWeight: '300',
+    },
+    intervalOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: Spacing.md,
+        borderRadius: 8,
+        marginBottom: Spacing.xs,
+        backgroundColor: Colors.background,
+        borderWidth: 2,
+        borderColor: 'transparent',
+    },
+    intervalOptionSelected: {
+        borderColor: Colors.primary,
+        backgroundColor: Colors.surface,
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        padding: Spacing.lg,
+    },
+    modalView: {
+        backgroundColor: 'white',
+        borderRadius: 16,
+        padding: Spacing.xl,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
     },
 });

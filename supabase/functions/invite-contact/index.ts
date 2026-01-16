@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -11,14 +11,31 @@ Deno.serve(async (req) => {
     }
 
     try {
+        // Debug: Log all headers
+        console.log('Request headers:', Object.fromEntries(req.headers.entries()));
+
+        const authHeader = req.headers.get('Authorization');
+        console.log('Authorization header:', authHeader ? authHeader.substring(0, 30) + '...' : 'MISSING');
+
         const supabaseClient = createClient(
             Deno.env.get('SUPABASE_URL') ?? '',
             Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-            { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+            { global: { headers: { Authorization: authHeader! } } }
         )
 
         const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
-        if (authError || !user) throw new Error('Unauthorized')
+
+        if (authError) {
+            console.error('Auth error:', authError);
+            throw new Error('Unauthorized: ' + authError.message);
+        }
+
+        if (!user) {
+            console.error('No user found');
+            throw new Error('Unauthorized: No user found');
+        }
+
+        console.log('Authenticated user:', user.email);
 
         const { contact_id } = await req.json()
         if (!contact_id) throw new Error('Contact ID is required')
