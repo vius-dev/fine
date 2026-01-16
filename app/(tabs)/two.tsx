@@ -77,11 +77,23 @@ export default function ContactsScreen() {
       // Trigger invite immediately
       if (data && data.length > 0) {
         const contactId = data[0].id;
-        await api.inviteContact(contactId);
+        const { error: inviteError } = await api.inviteContact(contactId);
+
+        if (inviteError) {
+          // Contact was added but invite failed
+          Alert.alert(
+            t('common.success'),
+            `Contact added, but invite failed: ${inviteError.message}`
+          );
+        } else {
+          // Both contact and invite succeeded
+          Alert.alert(t('common.success'), t('contacts.success_added'));
+        }
+      } else {
+        // Contact added but no ID returned
+        Alert.alert(t('common.success'), 'Contact added');
       }
 
-
-      Alert.alert(t('common.success'), t('contacts.success_added'));
       setModalVisible(false);
       setNewName('');
       setNewDestination('');
@@ -565,7 +577,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.lg,
   },
   modalButton: {
-    flex: 1 ,
+    flex: 1,
   },
   helperText: {
     ...Typography.caption,

@@ -13,11 +13,21 @@ export const api = {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('Not authenticated');
 
+            // Get current profile to check state
+            const { data: currentProfile } = await supabase
+                .from('users')
+                .select('state, first_checkin_completed')
+                .eq('auth_user_id', user.id)
+                .single();
+
+            const isFirstCheckIn = currentProfile?.state === 'ONBOARDING' || !currentProfile?.first_checkin_completed;
+
             const { data: profile, error: profileError } = await supabase
                 .from('users')
                 .update({
                     last_fine_at: new Date().toISOString(),
                     state: 'ACTIVE',
+                    first_checkin_completed: true,  // Mark first check-in as complete
                     updated_at: new Date().toISOString()
                 })
                 .eq('auth_user_id', user.id)
@@ -32,7 +42,7 @@ export const api = {
                 .insert({
                     user_id: profile.id,
                     to_state: 'ACTIVE',
-                    reason: 'Manual check-in (fallback)'
+                    reason: isFirstCheckIn ? 'First check-in completed (fallback)' : 'Manual check-in (fallback)'
                 });
 
             return { data: profile, error: null };
@@ -185,10 +195,24 @@ export const api = {
     },
 
     inviteContact: async (contactId: string) => {
-        const { error } = await supabase.functions.invoke('invite-contact', {
+        const { data, error } = await supabase.functions.invoke('invite-contact', {
             body: { contact_id: contactId }
         });
-        return { error };
+
+        // Check for network/invocation errors
+        if (error) {
+            console.error('Invite contact error:', error);
+            return { error };
+        }
+
+        // Check if the edge function returned an error in the response data
+        if (data?.error) {
+            console.error('Invite contact function error:', data.error);
+            return { error: new Error(data.error) };
+        }
+
+        console.log('Invite sent successfully:', data);
+        return { error: null };
     },
 
     confirmContactRequest: async (contactRecordId: string) => {

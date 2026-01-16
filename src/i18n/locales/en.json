@@ -141,15 +141,22 @@
         },
         "slide2": {
             "title": "Grace Period",
-            "description": "Missed your time? Don’t panic. You have a 1-hour grace period to check in before we alert anyone."
+            "description": "Missed your time? Don't panic. You have a 1-hour grace period to check in before we alert anyone."
         },
         "slide3": {
             "title": "Trusted Contacts",
-            "description": "If you still don’t check in, we’ll alert your trusted contacts so they can check on you."
+            "description": "If you still don't check in, we'll alert your trusted contacts so they can check on you."
         },
         "next": "Next",
         "get_started": "Get Started",
-        "skip": "Skip"
+        "skip": "Skip",
+        "first_checkin_title": "Complete Your First Check-In",
+        "first_checkin_description": "Check in at your preferred interval to let your trusted contacts know you're safe.",
+        "feature_reminders": "Flexible reminders at your schedule",
+        "feature_grace": "Grace period if you're running late",
+        "feature_alerts": "Contacts alerted only if needed",
+        "got_it": "Let's Go!",
+        "customize_hint": "You can customize your schedule anytime in settings"
     },
     "ringtones": {
         "default": {

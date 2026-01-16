@@ -9,7 +9,7 @@ export type UserProfile = {
     last_fine_at: string;
     checkin_interval_hours: number;
     grace_period_hours: number;
-    state: 'ACTIVE' | 'GRACE' | 'ESCALATED' | 'RESOLVED';
+    state: 'ACTIVE' | 'GRACE' | 'ESCALATED' | 'RESOLVED' | 'ONBOARDING';
     vacation_mode: boolean;
     ringtone_enabled: boolean;
     ringtone_selection: string;
@@ -17,6 +17,7 @@ export type UserProfile = {
     reminder_enabled: boolean;
     reminder_offset_hours: number;
     timezone?: string;
+    first_checkin_completed: boolean;
 };
 
 export const useProfile = () => {

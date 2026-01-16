@@ -2,6 +2,7 @@ import { addHours, format, formatDistanceToNow } from 'date-fns';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FirstCheckInOverlay } from '../../src/components/FirstCheckInOverlay';
 import { Screen } from '../../src/components/Screen';
 import { useProfile } from '../../src/hooks/useProfile';
 import { api } from '../../src/lib/api';
@@ -12,6 +13,7 @@ export default function HomeScreen() {
   const { profile, loading, refetch } = useProfile();
   const [checkingIn, setCheckingIn] = useState(false);
   const [panicModalVisible, setPanicModalVisible] = useState(false);
+  const [showOnboardingOverlay, setShowOnboardingOverlay] = useState(false);
   const [now, setNow] = useState(new Date());
 
   // Animation for pulsing button
@@ -90,24 +92,35 @@ export default function HomeScreen() {
   const isOverdue = nextCheckIn && now > nextCheckIn;
   const isGracePeriod = profile?.state === 'GRACE';
   const isVacation = profile?.vacation_mode;
+  const isOnboarding = profile?.state === 'ONBOARDING';
+
+  // Show overlay on first launch for ONBOARDING users
+  useEffect(() => {
+    if (isOnboarding && !loading && profile) {
+      setShowOnboardingOverlay(true);
+    }
+  }, [isOnboarding, loading, profile]);
 
   // New Logic: 
+  // If ONBOARDING -> "I'm Fine" (First check-in)
   // If VACATION -> Disabled
   // If OVERDUE / GRACE / ESCALATED -> "I'm Fine" (Green/Amber/Red context)
   // If ACTIVE & NOT OVERDUE -> "I'm NOT Fine" (Red Panic Button)
 
-  const isPanicMode = profile?.state === 'ACTIVE' && !isOverdue && !isVacation;
+  const isPanicMode = profile?.state === 'ACTIVE' && !isOverdue && !isVacation && !isOnboarding;
   const isButtonDisabled = isVacation;
 
   const stateLabel = isVacation ? t('status.vacation')
-    : isGracePeriod ? t('status.grace')
-      : (profile?.state === 'ACTIVE' ? t('status.active') : (profile?.state || t('status.unknown')));
+    : isOnboarding ? 'WELCOME'
+      : isGracePeriod ? t('status.grace')
+        : (profile?.state === 'ACTIVE' ? t('status.active') : (profile?.state || t('status.unknown')));
 
   // Color Logic
   const stateColor = isVacation ? Colors.textSecondary
-    : isGracePeriod ? Colors.grace
-      : isPanicMode ? Colors.escalated
-        : Colors.active;
+    : isOnboarding ? Colors.active
+      : isGracePeriod ? Colors.grace
+        : isPanicMode ? Colors.escalated
+          : Colors.active;
 
   // Countdown Logic for Grace Period
   const getGraceCountdown = () => {
@@ -135,12 +148,19 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* Hide last confirmed text during grace period to reduce noise */}
-        {!isGracePeriod && (
+        {/* Hide last confirmed text during grace period or onboarding to reduce noise */}
+        {!isGracePeriod && !isOnboarding && (
           <Text style={[Typography.body, styles.lastConfirmed]}>
             {lastConfirmed
               ? t('message.last_confirmed', { time: format(lastConfirmed, 'MMM d, h:mm a') })
               : t('message.no_checkins')}
+          </Text>
+        )}
+
+        {/* Show onboarding hint after overlay is dismissed */}
+        {isOnboarding && !showOnboardingOverlay && (
+          <Text style={[Typography.body, styles.onboardingHint]}>
+            Tap below to complete your first check-in
           </Text>
         )}
 
@@ -183,13 +203,20 @@ export default function HomeScreen() {
         <Text style={styles.disclaimer}>
           {isVacation
             ? t('home.vacation_desc')
-            : isGracePeriod
-              ? t('home.grace_desc')
-              : isPanicMode
-                ? t('home.panic_active_desc')
-                : t('home.active_desc')}
+            : isOnboarding
+              ? 'Welcome! Complete your first check-in to activate monitoring.'
+              : isGracePeriod
+                ? t('home.grace_desc')
+                : isPanicMode
+                  ? t('home.panic_active_desc')
+                  : t('home.active_desc')}
         </Text>
       </View>
+
+      {/* First Check-In Overlay */}
+      {showOnboardingOverlay && (
+        <FirstCheckInOverlay onAcknowledge={() => setShowOnboardingOverlay(false)} />
+      )}
 
       {/* Panic Confirmation Modal */}
       {isPanicMode && (
@@ -243,6 +270,12 @@ const styles = StyleSheet.create({
   lastConfirmed: {
     marginBottom: Spacing.xxl,
     color: Colors.textSecondary,
+  },
+  onboardingHint: {
+    marginBottom: Spacing.xxl,
+    color: Colors.active,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   checkInButton: {
     width: 200,
