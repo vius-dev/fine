@@ -116,10 +116,6 @@ export default function SettingsScreen() {
 
     return (
         <Screen style={styles.container}>
-            <View style={styles.header}>
-                <Text style={Typography.h1}>{t('settings.title')}</Text>
-            </View>
-
             <ScrollView contentContainerStyle={styles.content}>
                 {/* Vacation Mode - Disabled until user feedback validates need
                 <View style={styles.section}>
@@ -385,10 +381,9 @@ export default function SettingsScreen() {
                         onPress={handleLogout}
                         style={styles.logoutButton}
                     />
+                    <Text style={styles.version}>{t('settings.footer_version')}</Text>
                 </View>
             </ScrollView>
-
-            <Text style={styles.version}>{t('settings.footer_version')}</Text>
         </Screen>
     );
 }
@@ -455,8 +450,9 @@ const styles = StyleSheet.create({
     version: {
         ...Typography.caption,
         textAlign: 'center',
-        marginBottom: Spacing.lg,
-        opacity: 0.5,
+        marginTop: Spacing.md,
+        opacity: 0.4,
+        fontSize: 11,
     },
     ringtoneOption: {
         flexDirection: 'row',

@@ -74,14 +74,6 @@ export default function HomeScreen() {
     }
   };
 
-  if (loading && !profile) {
-    return (
-      <Screen style={styles.center}>
-        <Text style={Typography.body}>{t('home.loading')}</Text>
-      </Screen>
-    );
-  }
-
   const lastConfirmed = profile?.last_fine_at ? new Date(profile.last_fine_at) : null;
   const nextCheckIn = lastConfirmed
     ? addHours(lastConfirmed, profile?.checkin_interval_hours || 24)
@@ -100,6 +92,15 @@ export default function HomeScreen() {
       setShowOnboardingOverlay(true);
     }
   }, [isOnboarding, loading, profile]);
+
+  // Early return AFTER all hooks
+  if (loading && !profile) {
+    return (
+      <Screen style={styles.center}>
+        <Text style={Typography.body}>{t('home.loading')}</Text>
+      </Screen>
+    );
+  }
 
   // New Logic: 
   // If ONBOARDING -> "I'm Fine" (First check-in)
