@@ -71,7 +71,7 @@
     },
     "contacts": {
         "title": "Contacts de confiance",
-        "subtitle": "Ces personnes seront notifiées si vous manquez un enregistrement.",
+        "subtitle": "Ces contacts de confiance seront avertis si vous n'enregistrez pas.",
         "add_contact": "Ajouter un contact",
         "edit_contact": "Modifier le contact",
         "delete_contact": "Supprimer le contact",

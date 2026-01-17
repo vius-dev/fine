@@ -97,7 +97,8 @@ export const api = {
                 *,
                 linked_user:linked_user_id (
                     id,
-                    email
+                    email,
+                    avatar_url
                 )
             `)
             .order('created_at', { ascending: false });
@@ -202,7 +203,7 @@ export const api = {
             return { error: new Error('Not authenticated. Please log in again.') };
         }
 
-        console.log('Invoking invite-contact with session:', session.user.email);
+
 
         // Explicitly pass the Authorization header
         const { data, error } = await supabase.functions.invoke('invite-contact', {
@@ -221,7 +222,7 @@ export const api = {
             if (errorContext && typeof errorContext.json === 'function') {
                 try {
                     const errorMessage = await errorContext.json();
-                    console.log('Function returned an error', errorMessage);
+
                     return { error: new Error(errorMessage.error || JSON.stringify(errorMessage)) };
                 } catch (e) {
                     console.error('Failed to parse error context JSON', e);
@@ -238,15 +239,107 @@ export const api = {
             return { error: new Error(data.error) };
         }
 
-        console.log('Invite sent successfully:', data);
+
         return { error: null };
     },
 
     confirmContactRequest: async (contactRecordId: string) => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return { error: new Error('Not authenticated') };
+
         const { data, error } = await supabase.functions.invoke('confirm-contact', {
-            body: { contact_id: contactRecordId }
+            body: { contact_id: contactRecordId },
+            headers: { Authorization: `Bearer ${session.access_token}` }
         });
+
+        if (error) {
+            console.error('Confirm contact error:', error);
+            const errorContext = (error as any).context;
+            if (errorContext && typeof errorContext.json === 'function') {
+                try {
+                    const errorMessage = await errorContext.json();
+
+                    return { error: new Error(errorMessage.error || JSON.stringify(errorMessage)) };
+                } catch (e) { /* ignore */ }
+            }
+            return { error };
+        }
+
         return { data, error };
+    },
+
+    getTrustedLinks: async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return { data: null, error: new Error('Not authenticated') };
+
+        const { data, error } = await supabase.functions.invoke('get-trusted-links', {
+            headers: { Authorization: `Bearer ${session.access_token}` }
+        });
+
+        if (error) {
+            console.error('Get trusted links error:', error);
+            const errorContext = (error as any).context;
+            if (errorContext && typeof errorContext.json === 'function') {
+                try {
+                    const errorMessage = await errorContext.json();
+
+                    return { data: null, error: new Error(errorMessage.error || JSON.stringify(errorMessage)) };
+                } catch (e) { /* ignore */ }
+            }
+            return { data: null, error };
+        }
+
+        return { data: data || { pending: [], active: [] }, error: null };
+    },
+
+    declineContactRequest: async (contactId: string) => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return { error: new Error('Not authenticated') };
+
+        const { data, error } = await supabase.functions.invoke('confirm-contact', {
+            body: { contact_id: contactId, action: 'reject' },
+            headers: { Authorization: `Bearer ${session.access_token}` }
+        });
+
+        if (error) {
+            console.error('Decline contact error:', error);
+            const errorContext = (error as any).context;
+            if (errorContext && typeof errorContext.json === 'function') {
+                try {
+                    const errorMessage = await errorContext.json();
+
+                    return { error: new Error(errorMessage.error || JSON.stringify(errorMessage)) };
+                } catch (e) { /* ignore */ }
+            }
+            return { error };
+        }
+
+        return { data, error: null };
+    },
+
+    unlinkContact: async (contactId: string) => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return { error: new Error('Not authenticated') };
+
+        const { data, error } = await supabase.functions.invoke('confirm-contact', {
+            body: { contact_id: contactId, action: 'unlink' },
+            headers: { Authorization: `Bearer ${session.access_token}` }
+        });
+
+        if (error) {
+            console.error('Unlink contact error:', error);
+            const errorContext = (error as any).context;
+            if (errorContext && typeof errorContext.json === 'function') {
+                try {
+                    const errorMessage = await errorContext.json();
+
+                    return { error: new Error(errorMessage.error || JSON.stringify(errorMessage)) };
+                } catch (e) { /* ignore */ }
+            }
+            return { error };
+        }
+
+        return { data, error: null };
     },
 
     sendTestAlert: async () => {
@@ -302,5 +395,122 @@ export const api = {
             .eq('event.user_id', profile.id)
             .order('created_at', { ascending: false })
             .limit(100);
+    },
+
+    uploadAvatar: async (imageUri: string) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+
+        // Get user profile to get internal ID
+        const { data: profile } = await supabase
+            .from('users')
+            .select('id')
+            .eq('auth_user_id', user.id)
+            .single();
+
+        if (!profile) throw new Error('Profile not found');
+
+        // Import image manipulator
+        const { manipulateAsync, SaveFormat } = await import('expo-image-manipulator');
+
+        // Compress and resize image
+        let quality = 0.8;
+        let manipResult = await manipulateAsync(
+            imageUri,
+            [{ resize: { width: 500, height: 500 } }],
+            { compress: quality, format: SaveFormat.JPEG }
+        );
+
+        // Read file as base64 using expo-file-system
+        // Note: Using standard import. Warning about legacy API is non-blocking.
+        // Conditional import of 'expo-file-system/legacy' causes bundler issues.
+        const FileSystem = await import('expo-file-system');
+        const { getInfoAsync, readAsStringAsync } = FileSystem;
+        const { decode } = await import('base64-arraybuffer');
+
+        // Check size (approximate from file info) or read first
+        const fileInfo = await getInfoAsync(manipResult.uri);
+        if (!fileInfo.exists) throw new Error('File does not exist');
+
+        let currentUri = manipResult.uri;
+        // @ts-ignore: TS not narrowing correctly
+        let fileSize = fileInfo.size as number;
+
+        while (fileSize > 1024 * 1024 && quality > 0.1) {
+
+            quality -= 0.2;
+            const nextResult = await manipulateAsync(
+                imageUri,
+                [{ resize: { width: 500, height: 500 } }],
+                { compress: quality, format: SaveFormat.JPEG }
+            );
+            const nextInfo = await getInfoAsync(nextResult.uri);
+            if (!nextInfo.exists) throw new Error('Compression failed');
+            currentUri = nextResult.uri;
+            fileSize = nextInfo.size;
+        }
+
+        if (fileSize > 1024 * 1024) {
+            throw new Error('Image cannot be compressed under 1MB. Please use a simpler image.');
+        }
+
+        // Read final file as base64
+        // Use string 'base64' directly to avoid type access issues on dynamic import
+        const base64 = await readAsStringAsync(currentUri, { encoding: 'base64' });
+        const arrayBuffer = decode(base64);
+
+        // Upload to storage
+        const fileName = `${profile.id}/avatar.jpg`;
+        const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(fileName, arrayBuffer, {
+                contentType: 'image/jpeg',
+                upsert: true
+            });
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+            .from('avatars')
+            .getPublicUrl(fileName);
+
+        // Update profile
+        const { error: updateError } = await supabase
+            .from('users')
+            .update({ avatar_url: publicUrl })
+            .eq('id', profile.id);
+
+        if (updateError) throw updateError;
+
+        return { data: publicUrl, error: null };
+    },
+
+    deleteAvatar: async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+
+        // Get user profile
+        const { data: profile } = await supabase
+            .from('users')
+            .select('id')
+            .eq('auth_user_id', user.id)
+            .single();
+
+        if (!profile) throw new Error('Profile not found');
+
+        // Delete from storage
+        const fileName = `${profile.id}/avatar.jpg`;
+        await supabase.storage.from('avatars').remove([fileName]);
+
+        // Clear avatar_url in profile
+        const { error } = await supabase
+            .from('users')
+            .update({ avatar_url: null })
+            .eq('id', profile.id);
+
+        if (error) throw error;
+
+        return { error: null };
     }
 };

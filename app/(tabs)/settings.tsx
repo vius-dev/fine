@@ -1,8 +1,10 @@
 import Slider from '@react-native-community/slider';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next'; // Import useTranslation
 import { Alert, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Avatar } from '../../src/components/Avatar';
 import { Button } from '../../src/components/Button';
 import { Screen } from '../../src/components/Screen';
 import { useAuth } from '../../src/hooks/useAuth';
@@ -19,6 +21,8 @@ export default function SettingsScreen() {
     const { session } = useAuth();
     const [isPlayingPreview, setIsPlayingPreview] = useState(false);
     const [intervalModalVisible, setIntervalModalVisible] = useState(false);
+    const [gracePeriodModalVisible, setGracePeriodModalVisible] = useState(false);
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
     const handleUpdateVacationMode = async (value: boolean) => {
         try {
@@ -111,6 +115,64 @@ export default function SettingsScreen() {
         await supabase.auth.signOut();
     };
 
+    const handleUploadAvatar = async () => {
+        try {
+            // Request permission
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert(t('common.error'), 'Permission to access photos is required');
+                return;
+            }
+
+            // Pick image
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 1,
+            });
+
+            if (result.canceled) return;
+
+            setUploadingAvatar(true);
+            const { error } = await api.uploadAvatar(result.assets[0].uri);
+            if (error) throw error;
+
+            Alert.alert(t('common.success'), 'Profile picture updated');
+            refetch();
+        } catch (error: any) {
+            Alert.alert(t('common.error'), error.message);
+        } finally {
+            setUploadingAvatar(false);
+        }
+    };
+
+    const handleDeleteAvatar = async () => {
+        Alert.alert(
+            'Remove Photo',
+            'Are you sure you want to remove your profile picture?',
+            [
+                { text: t('common.cancel'), style: 'cancel' },
+                {
+                    text: 'Remove',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            setUploadingAvatar(true);
+                            const { error } = await api.deleteAvatar();
+                            if (error) throw error;
+                            refetch();
+                        } catch (error: any) {
+                            Alert.alert(t('common.error'), error.message);
+                        } finally {
+                            setUploadingAvatar(false);
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
     const selectedRingtone = profile?.ringtone_selection || 'default';
     const ringtoneVolume = profile?.ringtone_volume ?? 100;
     const ringtoneEnabled = profile?.ringtone_enabled ?? true;
@@ -163,6 +225,25 @@ export default function SettingsScreen() {
                             <Text style={styles.label}>Check-in Interval</Text>
                             <Text style={styles.intervalValue}>
                                 {t('message.every_hours', { hours: profile?.checkin_interval_hours || 24 })}
+                            </Text>
+                        </View>
+                        <Text style={styles.chevron}>›</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.intervalSelector}
+                        onPress={() => setGracePeriodModalVisible(true)}
+                    >
+                        <View style={styles.textColumn}>
+                            <Text style={styles.label}>{t('settings.grace_period_label')}</Text>
+                            <Text style={styles.description}>{t('settings.grace_period_desc')}</Text>
+                            <Text style={styles.intervalValue}>
+                                {(() => {
+                                    const mins = profile?.grace_period_minutes || 720;
+                                    if (mins < 60) return `${mins} ${t('common.minutes', { defaultValue: 'minutes' })}`;
+                                    const hours = mins / 60;
+                                    return hours === 1 ? `1 ${t('common.hour', { defaultValue: 'hour' })}` : `${hours} ${t('common.hours', { defaultValue: 'hours' })}`;
+                                })()}
                             </Text>
                         </View>
                         <Text style={styles.chevron}>›</Text>
@@ -344,6 +425,35 @@ export default function SettingsScreen() {
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>{t('settings.account')}</Text>
+
+                    {/* Avatar Section */}
+                    <View style={styles.avatarSection}>
+                        <Avatar
+                            uri={profile?.avatar_url}
+                            size={80}
+                            fallbackInitials={session?.user?.email?.charAt(0).toUpperCase()}
+                        />
+                        <View style={styles.avatarButtons}>
+                            <Button
+                                title={uploadingAvatar ? 'Uploading...' : (profile?.avatar_url ? 'Change Photo' : 'Add Photo')}
+                                variant="outline"
+                                size="small"
+                                onPress={handleUploadAvatar}
+                                disabled={uploadingAvatar}
+                            />
+                            {profile?.avatar_url && (
+                                <Button
+                                    title="Remove"
+                                    variant="secondary"
+                                    size="small"
+                                    onPress={handleDeleteAvatar}
+                                    disabled={uploadingAvatar}
+                                    style={{ marginLeft: Spacing.sm }}
+                                />
+                            )}
+                        </View>
+                    </View>
+
                     <Text style={styles.email}>{session?.user?.email}</Text>
                     <Button
                         title={t('settings.sign_out')}
@@ -402,6 +512,63 @@ export default function SettingsScreen() {
                             title="Cancel"
                             variant="outline"
                             onPress={() => setIntervalModalVisible(false)}
+                            style={{ marginTop: Spacing.md }}
+                        />
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Grace Period Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={gracePeriodModalVisible}
+                onRequestClose={() => setGracePeriodModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalView}>
+                        <Text style={[Typography.h2, { marginBottom: Spacing.md }]}>{t('settings.grace_period_modal_title')}</Text>
+                        <Text style={[styles.description, { marginBottom: Spacing.lg }]}>
+                            {t('settings.grace_period_modal_desc')}
+                        </Text>
+
+                        {[15, 30, 60, 240, 720, 1440].map((minutes) => (
+                            <TouchableOpacity
+                                key={minutes}
+                                style={[
+                                    styles.intervalOption,
+                                    (profile?.grace_period_minutes === minutes) && styles.intervalOptionSelected
+                                ]}
+                                onPress={async () => {
+                                    try {
+                                        const { error } = await api.updateProfile({ grace_period_minutes: minutes });
+                                        if (error) throw error;
+                                        refetch();
+                                        setGracePeriodModalVisible(false);
+                                    } catch (error: any) {
+                                        Alert.alert(t('common.error'), error.message);
+                                    }
+                                }}
+                            >
+                                <View style={styles.radioButton}>
+                                    {(profile?.grace_period_minutes === minutes) && (
+                                        <View style={styles.radioButtonInner} />
+                                    )}
+                                </View>
+                                <Text style={styles.label}>
+                                    {minutes < 60
+                                        ? `${minutes} ${t('common.minutes', { defaultValue: 'minutes' })}`
+                                        : minutes === 60
+                                            ? `1 ${t('common.hour', { defaultValue: 'hour' })}`
+                                            : `${minutes / 60} ${t('common.hours', { defaultValue: 'hours' })}`}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+
+                        <Button
+                            title={t('common.cancel')}
+                            variant="outline"
+                            onPress={() => setGracePeriodModalVisible(false)}
                             style={{ marginTop: Spacing.md }}
                         />
                     </View>
@@ -561,5 +728,16 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
+    },
+    avatarSection: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: Spacing.lg,
+        gap: Spacing.md,
+    },
+    avatarButtons: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
     },
 });

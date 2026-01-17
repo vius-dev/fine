@@ -20,7 +20,7 @@ export default function EscalationScreen() {
         const startRingtone = async () => {
             // Only play if ringtone is enabled
             if (profile?.ringtone_enabled === false) {
-                console.log('Ringtone disabled by user');
+
                 return;
             }
 

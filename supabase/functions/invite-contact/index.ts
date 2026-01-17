@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
                     to: contact.linked_user.expo_push_token,
                     sound: 'default',
                     title: '👥 Contact Request',
-                    body: 'Someone wants to add you as a trusted contact.',
+                    body: "Someone wants to add you as a trusted contact. Go to the 'I'm Protecting' tab to accept or decline.",
                     data: { type: 'CONTACT_REQUEST', contactId: contact.id },
                 }
 

@@ -71,7 +71,7 @@
     },
     "contacts": {
         "title": "Contactos de Confianza",
-        "subtitle": "Estas personas serán notificadas si pierdes un registro.",
+        "subtitle": "Estos contactos de confianza serán notificados si no se registra.",
         "add_contact": "Contacto",
         "edit_contact": "Editar Contacto",
         "delete_contact": "Eliminar Contacto",

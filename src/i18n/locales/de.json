@@ -71,7 +71,7 @@
     },
     "contacts": {
         "title": "Vertrauenskontakte",
-        "subtitle": "Diese Personen werden benachrichtigt, wenn Sie einen Check-in verpassen.",
+        "subtitle": "Diese vertrauenswürdigen Kontakte werden benachrichtigt, falls Sie einen Check-in versäumen.",
         "add_contact": "Kontakt ",
         "edit_contact": "Kontakt bearbeiten",
         "delete_contact": "Kontakt löschen",

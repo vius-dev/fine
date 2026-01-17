@@ -1,7 +1,9 @@
 import * as Contacts from 'expo-contacts';
+import { useFocusEffect } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Avatar } from '../../src/components/Avatar';
 import { Button } from '../../src/components/Button';
 import { Screen } from '../../src/components/Screen';
 import { TextInput } from '../../src/components/TextInput';
@@ -14,15 +16,30 @@ type Contact = {
   channel: 'PUSH' | 'EMAIL' | 'SMS';
   destination: string;
   status: 'PENDING' | 'CONFIRMED';
-  linked_user?: {
+  user_id?: string;
+  linked_user: {
     id: string;
     email: string;
-  };
+    avatar_url?: string;
+  } | null;
+  user?: { // For incoming invites
+    id: string;
+    email: string;
+    raw_user_meta_data?: any;
+  }
 };
 
 export default function ContactsScreen() {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<'guardians' | 'protecting'>('guardians');
+
+  // Tab 1: My Guardians
   const [contacts, setContacts] = useState<Contact[]>([]);
+
+  // Tab 2: I'm Protecting
+  const [pendingInvites, setPendingInvites] = useState<Contact[]>([]);
+  const [activeLinks, setActiveLinks] = useState<Contact[]>([]);
+
   const [loading, setLoading] = useState(true);
 
   // Add Contact Modal State
@@ -43,10 +60,23 @@ export default function ContactsScreen() {
   const [deviceContacts, setDeviceContacts] = useState<Contacts.Contact[]>([]);
 
   const fetchContacts = async () => {
+    setLoading(true);
     try {
-      const { data, error } = await api.getContacts();
-      if (error) throw error;
-      setContacts(data as Contact[]);
+      // Fetch "My Guardians"
+      const { data: contactsData, error: contactsError } = await api.getContacts();
+      if (contactsError) throw contactsError;
+      setContacts(contactsData as Contact[]);
+
+      // Fetch "I'm Protecting"
+      const { data: linksData, error: linksError } = await api.getTrustedLinks();
+      if (linksError) throw linksError;
+
+      if (linksData) {
+
+        setPendingInvites(linksData.pending || []);
+        setActiveLinks(linksData.active || []);
+      }
+
     } catch (error: any) {
       console.error(error);
       Alert.alert(t('common.error'), t('contacts.error_fetch'));
@@ -58,6 +88,13 @@ export default function ContactsScreen() {
   useEffect(() => {
     fetchContacts();
   }, []);
+
+  // Auto-refresh when screen comes into focus (e.g., from push notification)
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchContacts();
+    }, [])
+  );
 
   const handleAddContact = async () => {
     if (!newName || !newDestination) {
@@ -196,6 +233,65 @@ export default function ContactsScreen() {
     }
   };
 
+  const handleConfirmInvite = async (contact: Contact) => {
+    try {
+      const { error } = await api.confirmContactRequest(contact.id);
+      if (error) throw error;
+      Alert.alert(t('common.success'), "Invitation accepted!");
+      fetchContacts();
+    } catch (error: any) {
+      Alert.alert(t('common.error'), error.message);
+    }
+  };
+
+  const handleDeclineInvite = async (contact: Contact) => {
+    Alert.alert(
+      "Decline Invitation",
+      "Are you sure you want to decline this invitation?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Decline",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const { error } = await api.declineContactRequest(contact.id);
+              if (error) throw error;
+              Alert.alert(t('common.success'), "Invitation declined.");
+              fetchContacts();
+            } catch (error: any) {
+              Alert.alert(t('common.error'), error.message);
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleUnlinkUser = async (contact: Contact) => {
+    Alert.alert(
+      "Stop Protecting",
+      `Are you sure you want to stop protecting ${contact.user?.email || 'this user'}? You will no longer receive their alerts.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Stop Protecting",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const { error } = await api.unlinkContact(contact.id);
+              if (error) throw error;
+              Alert.alert(t('common.success'), "You are no longer a guardian for this user.");
+              fetchContacts();
+            } catch (error: any) {
+              Alert.alert(t('common.error'), error.message);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const selectDeviceContact = (contact: Contacts.Contact) => {
     const phone = contact.phoneNumbers?.[0]?.number;
     const email = contact.emails?.[0]?.email;
@@ -219,16 +315,23 @@ export default function ContactsScreen() {
   const renderItem = ({ item }: { item: Contact }) => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
-        <Text style={styles.contactName}>{item.name}</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {item.linked_user && (
-            <View style={styles.appBadge}>
-              <Text style={styles.appBadgeText}>{t('contacts.has_app')}</Text>
-            </View>
-          )}
-          <Text style={[styles.status, item.status === 'CONFIRMED' ? styles.statusConfirmed : styles.statusPending]}>
-            {item.status === 'CONFIRMED' ? t('contacts.status_confirmed') : t('contacts.status_pending')}
-          </Text>
+        <Avatar
+          uri={item.linked_user?.avatar_url}
+          size={48}
+          fallbackInitials={item.name?.charAt(0).toUpperCase()}
+        />
+        <View style={{ flex: 1, marginLeft: Spacing.sm }}>
+          <Text style={styles.contactName}>{item.name}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            {item.linked_user && (
+              <View style={styles.appBadge}>
+                <Text style={styles.appBadgeText}>{t('contacts.has_app')}</Text>
+              </View>
+            )}
+            <Text style={[styles.status, item.status === 'CONFIRMED' ? styles.statusConfirmed : styles.statusPending]}>
+              {item.status === 'CONFIRMED' ? t('contacts.status_confirmed') : t('contacts.status_pending')}
+            </Text>
+          </View>
         </View>
       </View>
       <Text style={styles.contactDetail}>{item.destination}</Text>
@@ -258,6 +361,52 @@ export default function ContactsScreen() {
     </View>
   );
 
+  const renderGenericItem = (item: Contact, type: 'pending' | 'active') => (
+    <View style={styles.card}>
+      <View style={styles.cardHeader}>
+        <Avatar
+          uri={item.linked_user?.avatar_url}
+          size={48}
+          fallbackInitials={item.name?.charAt(0).toUpperCase() || item.linked_user?.email?.charAt(0).toUpperCase()}
+        />
+        <View style={{ flex: 1, marginLeft: Spacing.sm }}>
+          <Text style={styles.contactName}>{item.name || item.linked_user?.email || 'Unknown User'}</Text>
+          <Text style={styles.contactDetail}>{item.linked_user?.email || 'FineApp User'}</Text>
+        </View>
+        {type === 'pending' && <View style={styles.pendingBadge}><Text style={styles.pendingBadgeText}>INVITE</Text></View>}
+        {type === 'active' && <View style={styles.activeBadge}><Text style={styles.activeBadgeText}>ACTIVE</Text></View>}
+      </View>
+
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: Spacing.sm, gap: 8 }}>
+        {type === 'pending' ? (
+          <>
+            <Button
+              title="Decline"
+              variant="outline"
+              onPress={() => handleDeclineInvite(item)}
+              style={{ paddingVertical: 6, minWidth: 80 }}
+              textStyle={{ color: Colors.escalated, fontSize: 12 }}
+            />
+            <Button
+              title="Accept"
+              onPress={() => handleConfirmInvite(item)}
+              style={{ paddingVertical: 6, minWidth: 80 }}
+              textStyle={{ fontSize: 12 }}
+            />
+          </>
+        ) : (
+          <Button
+            title="Stop Protecting"
+            variant="outline"
+            onPress={() => handleUnlinkUser(item)}
+            style={{ paddingVertical: 6 }}
+            textStyle={{ color: Colors.escalated, fontSize: 12 }}
+          />
+        )}
+      </View>
+    </View>
+  )
+
   return (
     <Screen style={styles.container}>
       <View style={styles.header}>
@@ -265,27 +414,67 @@ export default function ContactsScreen() {
         <Text style={[Typography.body, styles.subtitle]}>
           {t('contacts.subtitle')}
         </Text>
+
+        {/* Segmented Control */}
+        <View style={styles.segmentedControl}>
+          <TouchableOpacity
+            style={[styles.segment, activeTab === 'guardians' && styles.segmentActive]}
+            onPress={() => setActiveTab('guardians')}
+          >
+            <Text style={[styles.segmentText, activeTab === 'guardians' && styles.segmentTextActive]}>My Guardians</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.segment, activeTab === 'protecting' && styles.segmentActive]}
+            onPress={() => setActiveTab('protecting')}
+          >
+            <Text style={[styles.segmentText, activeTab === 'protecting' && styles.segmentTextActive]}>I'm Protecting</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <FlatList
-        data={contacts}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        refreshing={loading}
-        onRefresh={fetchContacts}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>{t('contacts.no_contacts')}</Text>
-          </View>
-        }
-      />
-
-      <Button
-        title={t('contacts.add_contact')}
-        onPress={() => setModalVisible(true)}
-        style={styles.fab}
-      />
+      {activeTab === 'guardians' ? (
+        <>
+          <FlatList
+            data={contacts}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.list}
+            refreshing={loading}
+            onRefresh={fetchContacts}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>{t('contacts.no_contacts')}</Text>
+              </View>
+            }
+          />
+          <Button
+            title={t('contacts.add_contact')}
+            onPress={() => setModalVisible(true)}
+            style={styles.fab}
+          />
+        </>
+      ) : (
+        <FlatList
+          // Merge lists with headers? Or just sections.
+          // Let's do a simple vertical scroll with headers manually inserted or filtered data.
+          // Actually, keep it simple.
+          data={[
+            ...pendingInvites.map(i => ({ ...i, type: 'pending' as const })),
+            ...activeLinks.map(i => ({ ...i, type: 'active' as const }))
+          ]}
+          renderItem={({ item }) => renderGenericItem(item, item.type)}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+          refreshing={loading}
+          onRefresh={fetchContacts}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>You are not protecting anyone yet.</Text>
+              <Text style={[styles.emptyText, { fontSize: 12, marginTop: 8 }]}>Invites sent to your email/phone will appear here.</Text>
+            </View>
+          }
+        />
+      )}
 
       {/* Manual Add Contact Modal */}
       <Modal
@@ -616,5 +805,53 @@ const styles = StyleSheet.create({
   },
   iconButtonText: {
     fontSize: 18,
+  },
+  segmentedControl: {
+    flexDirection: 'row',
+    backgroundColor: Colors.surface,
+    borderRadius: 12, // slightly rounded
+    padding: 4,
+    marginTop: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  segment: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  segmentActive: {
+    backgroundColor: Colors.primary,
+  },
+  segmentText: {
+    fontWeight: '600',
+    color: Colors.textSecondary,
+    fontSize: 13,
+  },
+  segmentTextActive: {
+    color: 'white',
+  },
+  pendingBadge: {
+    backgroundColor: '#E3F2FD',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  pendingBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#1565C0',
+  },
+  activeBadge: {
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  activeBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#2E7D32',
   },
 });

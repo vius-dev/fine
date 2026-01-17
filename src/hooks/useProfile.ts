@@ -8,7 +8,8 @@ export type UserProfile = {
     email: string;
     last_fine_at: string;
     checkin_interval_hours: number;
-    grace_period_hours: number;
+    grace_period_hours?: number; // Deprecated
+    grace_period_minutes: number;
     state: 'ACTIVE' | 'GRACE' | 'ESCALATED' | 'RESOLVED' | 'ONBOARDING';
     vacation_mode: boolean;
     ringtone_enabled: boolean;
@@ -18,6 +19,7 @@ export type UserProfile = {
     reminder_offset_hours: number;
     timezone?: string;
     first_checkin_completed: boolean;
+    avatar_url?: string;
 };
 
 export const useProfile = () => {

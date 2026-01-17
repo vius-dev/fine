@@ -41,11 +41,6 @@ Deno.serve(async (req) => {
             .eq('user_id', user_id)
             .eq('status', 'CONFIRMED')
 
-        if (contactsError) throw new Error('Failed to fetch contacts')
-        if (!contacts || contacts.length === 0) {
-            return new Response(JSON.stringify({ message: 'No contacts to notify' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-        }
-
         const results = []
 
         // Message Templates
@@ -54,6 +49,38 @@ Deno.serve(async (req) => {
             : `${userName} sent a status update`
 
         const baseLink = 'https://fineapp.vercel.app/alert' // Deep link to alert page
+
+        // ------------------------------------------------------------------
+        // NEW: Notify the user themselves (Self-Notification)
+        // ------------------------------------------------------------------
+        if (type === 'ESCALATION' && userProfile.expo_push_token) {
+            try {
+                await fetch('https://exp.host/--/api/v2/push/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        to: userProfile.expo_push_token,
+                        title: '⚠️ Missed Check-in',
+                        body: 'You missed your check-in time. Your trusted contacts have been alerted.',
+                        data: { type: 'SELF_ALERT', userId: user_id },
+                        sound: 'default', // TODO: Map userProfile.ringtone_selection to file if custom sounds supported
+                        priority: 'high',
+                        channelId: 'escalation' // Android channel
+                    }),
+                });
+                console.log(`Self-notification sent to ${userProfile.email}`);
+            } catch (err) {
+                console.error('Failed to send self-notification:', err);
+            }
+        }
+
+        if (contactsError) throw new Error('Failed to fetch contacts')
+        if (!contacts || contacts.length === 0) {
+            console.log('No contacts to notify, but self-notification might have been sent.')
+            // Don't return here if self-notification was attempted, or at least log it.
+            // Proceed to return if strictly no contacts.
+            if (!results.length) return new Response(JSON.stringify({ message: 'No contacts to notify' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+        }
 
         const emailHtml = `
       <h2>${type === 'ESCALATION' ? 'Emergency Alert' : 'Status Update'}</h2>

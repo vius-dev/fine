@@ -25,7 +25,7 @@ const LANGUAGE_DETECTOR = {
                 return callback(storedLanguage);
             }
         } catch (error) {
-            console.log('Error reading language', error);
+            console.error('Error reading language', error);
         }
 
         // Fallback to device locale
@@ -37,7 +37,7 @@ const LANGUAGE_DETECTOR = {
         try {
             await AsyncStorage.setItem('user-language', language);
         } catch (error) {
-            console.log('Error saving language', error);
+            console.error('Error saving language', error);
         }
     },
 };

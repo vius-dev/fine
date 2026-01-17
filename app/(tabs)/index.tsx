@@ -1,4 +1,4 @@
-import { addHours, format, formatDistanceToNow } from 'date-fns';
+import { addHours, addMinutes, format, formatDistanceToNow } from 'date-fns';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -20,7 +20,7 @@ export default function HomeScreen() {
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    const interval = setInterval(() => setNow(new Date()), 60000);
+    const interval = setInterval(() => setNow(new Date()), 1000); // Update every second for countdown
     return () => clearInterval(interval);
   }, []);
 
@@ -79,7 +79,7 @@ export default function HomeScreen() {
     ? addHours(lastConfirmed, profile?.checkin_interval_hours || 24)
     : null;
 
-  const gracePeriodEnd = nextCheckIn ? addHours(nextCheckIn, 1) : null; // 1 hour grace
+  const gracePeriodEnd = nextCheckIn ? addMinutes(nextCheckIn, profile?.grace_period_minutes || 60) : null;
 
   const isOverdue = nextCheckIn && now > nextCheckIn;
   const isGracePeriod = profile?.state === 'GRACE';
@@ -132,6 +132,28 @@ export default function HomeScreen() {
     const s = Math.floor((diff / 1000) % 60);
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
+
+  // Countdown Logic for Next Check-in
+  const getCheckInCountdown = () => {
+    if (!nextCheckIn) return null;
+    const diff = nextCheckIn.getTime() - now.getTime();
+    if (diff <= 0) return null; // Overdue
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${seconds}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
+    } else {
+      return `${seconds}s`;
+    }
+  };
+
+  const checkInCountdown = getCheckInCountdown();
+  const isApproachingDeadline = nextCheckIn && (nextCheckIn.getTime() - now.getTime()) < (2 * 60 * 60 * 1000); // < 2 hours
 
   return (
     <Screen style={styles.container}>
@@ -190,7 +212,20 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </Animated.View>
 
-        {!isGracePeriod && nextCheckIn && (
+        {/* Check-in Countdown Timer */}
+        {!isGracePeriod && !isVacation && !isOnboarding && checkInCountdown && (
+          <View style={styles.countdownContainer}>
+            <Text style={styles.countdownLabel}>Next check-in in</Text>
+            <Text style={[
+              styles.countdownText,
+              { color: isApproachingDeadline ? Colors.grace : Colors.active }
+            ]}>
+              {checkInCountdown}
+            </Text>
+          </View>
+        )}
+
+        {!isGracePeriod && nextCheckIn && !checkInCountdown && (
           <Text style={[Typography.caption, styles.nextCheckIn]}>
             {isOverdue && !isGracePeriod
               ? t('message.was_due', { time: formatDistanceToNow(nextCheckIn, { addSuffix: true }) })
@@ -395,5 +430,21 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.grace,
     fontVariant: ['tabular-nums'],
-  }
+  },
+  countdownContainer: {
+    alignItems: 'center',
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.md,
+  },
+  countdownLabel: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.xs,
+    fontSize: 12,
+  },
+  countdownText: {
+    fontSize: 28,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
 });

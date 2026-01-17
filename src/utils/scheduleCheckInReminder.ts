@@ -18,7 +18,7 @@ export async function scheduleCheckInReminder(
 
         // Don't schedule if reminder time is in the past
         if (reminderTime.getTime() <= Date.now()) {
-            console.log('Reminder time is in the past, skipping');
+
             return null;
         }
 
@@ -41,7 +41,7 @@ export async function scheduleCheckInReminder(
             },
         });
 
-        console.log(`Check-in reminder scheduled for ${reminderTime.toISOString()}`);
+
         return notificationId;
     } catch (error) {
         console.error('Failed to schedule check-in reminder:', error);
