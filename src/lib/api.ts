@@ -203,7 +203,6 @@ export const api = {
         }
 
         console.log('Invoking invite-contact with session:', session.user.email);
-        console.log('Access token:', session.access_token.substring(0, 20) + '...');
 
         // Explicitly pass the Authorization header
         const { data, error } = await supabase.functions.invoke('invite-contact', {
@@ -217,21 +216,16 @@ export const api = {
         if (error) {
             console.error('Invite contact error:', error);
 
-            // Try to extract the response body for more details
-            try {
-                const errorContext = (error as any).context;
-                if (errorContext?._bodyInit?._data) {
-                    console.log('Error response body available');
+            // Check if it's a FunctionsHttpError by checking properties
+            const errorContext = (error as any).context;
+            if (errorContext && typeof errorContext.json === 'function') {
+                try {
+                    const errorMessage = await errorContext.json();
+                    console.log('Function returned an error', errorMessage);
+                    return { error: new Error(errorMessage.error || JSON.stringify(errorMessage)) };
+                } catch (e) {
+                    console.error('Failed to parse error context JSON', e);
                 }
-
-                // Log the full error for debugging
-                console.error('Full error object:', {
-                    name: error.name,
-                    message: error.message,
-                    status: errorContext?.status,
-                });
-            } catch (e) {
-                console.error('Could not parse error details');
             }
 
             const errorMessage = error.message || 'Edge Function returned a non-2xx status code';

@@ -43,6 +43,12 @@
         "projectId": "626fa882-ca6a-4937-9b0a-a8c38e91c48e"
       }
     },
+    "updates": {
+      "url": "https://u.expo.dev/626fa882-ca6a-4937-9b0a-a8c38e91c48e"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "owner": "feincom"
   }
 }
