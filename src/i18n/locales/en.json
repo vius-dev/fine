@@ -26,16 +26,13 @@
         "checkin_schedule": "Check-in Schedule",
         "checkin_schedule_desc": "How often do you want to check in?",
         "reminders": "Check-in Reminders",
-        "reminders_label": "Reminder Notifications",
         "reminders_desc": "Get notified when check-in is due",
         "reminder_offset_label": "Reminder Offset",
         "reminder_picker_due": "When check-in is due",
         "reminder_picker_before": "{{hours}} hour before",
         "reminder_picker_before_plural": "{{hours}} hours before",
         "escalation_alert": "Escalation Alert",
-        "escalation_sound_label": "Alert Sound",
         "escalation_sound_desc": "Play sound when escalated",
-        "grace_period_label": "Alert Grace Period",
         "grace_period_desc": "Time before guardians are notified",
         "grace_period_modal_title": "Grace Period",
         "grace_period_modal_desc": "How long after a missed check-in should we wait before alerting guardians?",
@@ -74,7 +71,6 @@
         "modal_title": "Modal"
     },
     "contacts": {
-        "title": "Trusted Contacts",
         "subtitle": "These trusted contacts will be notified if you miss a check-in.",
         "add_contact": "Contact",
         "edit_contact": "Edit Contact",
@@ -112,7 +108,6 @@
         "phone_label": "Phone Number"
     },
     "notification_history": {
-        "title": "Notification History",
         "subtitle": "Timeline of all notifications sent to your contacts",
         "back": "← Back",
         "empty_title": "No notifications sent yet",
@@ -200,6 +195,7 @@
         "signup_title": "Create Account",
         "login_subtitle": "Sign in to continue",
         "signup_subtitle": "Sign up to start your safety intervals",
+        "full_name_label": "Full Name",
         "email_label": "Email Address",
         "email_placeholder": "name@example.com",
         "password_label": "Password",

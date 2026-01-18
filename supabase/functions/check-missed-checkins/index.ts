@@ -27,18 +27,18 @@ Deno.serve(async (req) => {
         }
 
         if (!overdueUsers || overdueUsers.length === 0) {
-            console.log('No overdue users found.')
+
             return new Response(JSON.stringify({ message: 'No overdue users found' }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             })
         }
 
-        console.log(`Found ${overdueUsers.length} overdue users. Processing...`)
+
         const results = []
 
         // 2. Process each user
         for (const user of overdueUsers) {
-            console.log(`Escalating user: ${user.id} (${user.email})`)
+
 
             // A. Update Status to ESCALATED
             const { error: updateError } = await supabaseClient

@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
             )
         }
 
-        console.log('Authenticated user:', user.email)
+
 
         const { contact_id, action = 'confirm' } = await req.json()
         if (!contact_id) throw new Error('Contact ID is required')

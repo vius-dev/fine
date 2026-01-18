@@ -73,7 +73,8 @@ export const api = {
                 }
             } catch (reminderError) {
                 // Don't fail check-in if reminder scheduling fails
-                console.error('Failed to schedule reminder:', reminderError);
+                console.warn('Failed to schedule reminder:', reminderError);
+                // Don't fail the check-in if reminder fails
             }
         }
 
@@ -98,6 +99,13 @@ export const api = {
                 linked_user:linked_user_id (
                     id,
                     email,
+                    full_name,
+                    avatar_url
+                ),
+                owner:user_id (
+                    id,
+                    email,
+                    full_name,
                     avatar_url
                 )
             `)
@@ -147,6 +155,66 @@ export const api = {
             .from('contacts')
             .delete()
             .eq('id', contactId);
+    },
+
+    escalate: async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+
+        const { data: profile } = await supabase
+            .from('users')
+            .select('id, full_name')
+            .eq('auth_user_id', user.id)
+            .single();
+
+        if (!profile) throw new Error('Profile not found');
+
+        // 1. Update user state to ESCALATED
+        const { error: updateError } = await supabase
+            .from('users')
+            .update({
+                state: 'ESCALATED',
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', profile.id);
+
+        if (updateError) throw updateError;
+
+        // 2. Log event
+        await supabase
+            .from('user_state_events')
+            .insert({
+                user_id: profile.id,
+                to_state: 'ESCALATED',
+                reason: 'User triggered panic button'
+            });
+
+        // 3. Notify contacts (Manually call function since trigger is active/removed)
+        await supabase.functions.invoke('dispatch-notifications', {
+            body: {
+                user_id: profile.id,
+                type: 'ESCALATION'
+            }
+        });
+
+        return { error: null };
+    },
+
+    acknowledgeAlert: async (targetUserId: string) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+
+        // We are notifying the TARGET (original sender) that WE (current user) have acknowledged
+        // The edge function will look up OUR name to tell THEM
+        await supabase.functions.invoke('dispatch-notifications', {
+            body: {
+                user_id: user.id, // I am the one acknowledging
+                type: 'ACKNOWLEDGMENT',
+                target_user_id: targetUserId // I am notifying YOU
+            }
+        });
+
+        return { error: null };
     },
 
     resolveAlert: async () => {
@@ -199,7 +267,7 @@ export const api = {
         // Check if user is authenticated
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-            console.error('No active session when trying to invite contact');
+            console.warn('No active session when trying to invite contact');
             return { error: new Error('Not authenticated. Please log in again.') };
         }
 
@@ -215,7 +283,7 @@ export const api = {
 
         // Check for network/invocation errors
         if (error) {
-            console.error('Invite contact error:', error);
+            console.warn('Invite contact error:', error);
 
             // Check if it's a FunctionsHttpError by checking properties
             const errorContext = (error as any).context;
@@ -225,7 +293,7 @@ export const api = {
 
                     return { error: new Error(errorMessage.error || JSON.stringify(errorMessage)) };
                 } catch (e) {
-                    console.error('Failed to parse error context JSON', e);
+                    console.warn('Failed to parse error context JSON', e);
                 }
             }
 
@@ -235,7 +303,7 @@ export const api = {
 
         // Check if the edge function returned an error in the response data
         if (data?.error) {
-            console.error('Invite contact function error:', data.error);
+            console.warn('Invite contact function error:', data.error);
             return { error: new Error(data.error) };
         }
 
@@ -253,7 +321,7 @@ export const api = {
         });
 
         if (error) {
-            console.error('Confirm contact error:', error);
+            console.warn('Confirm contact error:', error);
             const errorContext = (error as any).context;
             if (errorContext && typeof errorContext.json === 'function') {
                 try {
@@ -277,7 +345,7 @@ export const api = {
         });
 
         if (error) {
-            console.error('Get trusted links error:', error);
+            console.warn('Get trusted links error:', error);
             const errorContext = (error as any).context;
             if (errorContext && typeof errorContext.json === 'function') {
                 try {
@@ -302,7 +370,7 @@ export const api = {
         });
 
         if (error) {
-            console.error('Decline contact error:', error);
+            console.warn('Decline contact error:', error);
             const errorContext = (error as any).context;
             if (errorContext && typeof errorContext.json === 'function') {
                 try {
@@ -327,7 +395,7 @@ export const api = {
         });
 
         if (error) {
-            console.error('Unlink contact error:', error);
+            console.warn('Unlink contact error:', error);
             const errorContext = (error as any).context;
             if (errorContext && typeof errorContext.json === 'function') {
                 try {
@@ -392,98 +460,201 @@ export const api = {
                     user_id
                 )
             `)
-            .eq('event.user_id', profile.id)
+
             .order('created_at', { ascending: false })
             .limit(100);
     },
 
     uploadAvatar: async (imageUri: string) => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error('Not authenticated');
+        try {
 
-        // Get user profile to get internal ID
-        const { data: profile } = await supabase
-            .from('users')
-            .select('id')
-            .eq('auth_user_id', user.id)
-            .single();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                console.error('[AVATAR UPLOAD] Not authenticated');
+                throw new Error('Not authenticated');
+            }
 
-        if (!profile) throw new Error('Profile not found');
 
-        // Import image manipulator
-        const { manipulateAsync, SaveFormat } = await import('expo-image-manipulator');
+            // Get user profile to get internal ID
+            const { data: profile } = await supabase
+                .from('users')
+                .select('id')
+                .eq('auth_user_id', user.id)
+                .single();
 
-        // Compress and resize image
-        let quality = 0.8;
-        let manipResult = await manipulateAsync(
-            imageUri,
-            [{ resize: { width: 500, height: 500 } }],
-            { compress: quality, format: SaveFormat.JPEG }
-        );
+            if (!profile) {
+                console.error('[AVATAR UPLOAD] Profile not found');
+                throw new Error('Profile not found');
+            }
 
-        // Read file as base64 using expo-file-system
-        // Note: Using standard import. Warning about legacy API is non-blocking.
-        // Conditional import of 'expo-file-system/legacy' causes bundler issues.
-        const FileSystem = await import('expo-file-system');
-        const { getInfoAsync, readAsStringAsync } = FileSystem;
-        const { decode } = await import('base64-arraybuffer');
 
-        // Check size (approximate from file info) or read first
-        const fileInfo = await getInfoAsync(manipResult.uri);
-        if (!fileInfo.exists) throw new Error('File does not exist');
+            // Import image manipulator
+            const { manipulateAsync, SaveFormat } = await import('expo-image-manipulator');
 
-        let currentUri = manipResult.uri;
-        // @ts-ignore: TS not narrowing correctly
-        let fileSize = fileInfo.size as number;
+            // Compress and resize image
+            let quality = 0.8;
 
-        while (fileSize > 1024 * 1024 && quality > 0.1) {
-
-            quality -= 0.2;
-            const nextResult = await manipulateAsync(
+            let manipResult = await manipulateAsync(
                 imageUri,
                 [{ resize: { width: 500, height: 500 } }],
                 { compress: quality, format: SaveFormat.JPEG }
             );
-            const nextInfo = await getInfoAsync(nextResult.uri);
-            if (!nextInfo.exists) throw new Error('Compression failed');
-            currentUri = nextResult.uri;
-            fileSize = nextInfo.size;
+
+
+            // Import file system - use the actual new File API for SDK 54
+            const { decode } = await import('base64-arraybuffer');
+
+            // Use fetch to read the file (works with file:// URIs and doesn't use deprecated APIs)
+
+            let currentUri = manipResult.uri;
+            let fileSize: number;
+
+            try {
+
+                const response = await fetch(manipResult.uri);
+                const blob = await response.blob();
+                fileSize = blob.size;
+
+            } catch (error) {
+                console.error('[AVATAR UPLOAD] Error reading file:', error);
+                console.error('[AVATAR UPLOAD] Error type:', typeof error);
+                console.error('[AVATAR UPLOAD] Error name:', (error as any)?.name);
+                console.error('[AVATAR UPLOAD] Error message:', (error as any)?.message);
+                console.error('[AVATAR UPLOAD] Error stack:', (error as any)?.stack);
+                console.error('[AVATAR UPLOAD] Full error object:', error);
+                throw error;
+            }
+
+            // Iterative compression if needed
+            let compressionAttempts = 0;
+
+            while (fileSize > 1024 * 1024 && quality > 0.1) {
+                compressionAttempts++;
+                quality -= 0.2;
+                quality -= 0.2;
+
+                try {
+                    const nextResult = await manipulateAsync(
+                        imageUri,
+                        [{ resize: { width: 500, height: 500 } }],
+                        { compress: quality, format: SaveFormat.JPEG }
+                    );
+
+
+
+                    const nextResponse = await fetch(nextResult.uri);
+                    const nextBlob = await nextResponse.blob();
+                    const nextFileSize = nextBlob.size;
+
+
+                    currentUri = nextResult.uri;
+                    fileSize = nextFileSize;
+
+                } catch (compressionError) {
+                    console.error('[AVATAR UPLOAD]   - ❌ Compression error:', compressionError);
+                    throw compressionError;
+                }
+            }
+
+
+
+            if (fileSize > 1024 * 1024) {
+                console.error('[AVATAR UPLOAD] Image cannot be compressed under 1MB. Final size:', (fileSize / 1024 / 1024).toFixed(2), 'MB');
+                throw new Error('Image cannot be compressed under 1MB. Please use a simpler image.');
+            }
+
+
+
+            // Read final file and convert to base64
+
+            let base64: string;
+            try {
+                const finalResponse = await fetch(currentUri);
+                const finalBlob = await finalResponse.blob();
+
+                // Convert blob to base64 using FileReader
+                base64 = await new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const result = reader.result as string;
+                        // Remove data URL prefix (data:image/jpeg;base64,)
+                        const base64Data = result.split(',')[1];
+                        resolve(base64Data);
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(finalBlob);
+                });
+
+            } catch (base64Error) {
+                console.error('[AVATAR UPLOAD]   - ❌ Failed to read file as base64:', base64Error);
+                console.error('[AVATAR UPLOAD]   - Error details:', base64Error);
+                throw base64Error;
+            }
+
+
+            let arrayBuffer: ArrayBuffer;
+            try {
+                arrayBuffer = decode(base64);
+            } catch (decodeError) {
+                console.error('[AVATAR UPLOAD]   - ❌ Failed to decode base64:', decodeError);
+                throw decodeError;
+            }
+
+            // Upload to storage
+            // IMPORTANT: Use auth user ID (user.id) not profile ID for RLS policy to work
+            const fileName = `${user.id}/avatar.jpg`;
+
+
+            try {
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('avatars')
+                    .upload(fileName, arrayBuffer, {
+                        contentType: 'image/jpeg',
+                        upsert: true
+                    });
+
+                if (uploadError) {
+                    console.error('[AVATAR UPLOAD]   - ❌ Storage upload error:', uploadError);
+                    console.error('[AVATAR UPLOAD]   - Error code:', (uploadError as any)?.statusCode);
+                    console.error('[AVATAR UPLOAD]   - Error message:', uploadError.message);
+                    throw uploadError;
+                }
+
+
+            } catch (uploadError) {
+                console.error('[AVATAR UPLOAD]   - ❌ Upload exception:', uploadError);
+                throw uploadError;
+            }
+
+            // Get public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(fileName);
+
+            // Update profile
+
+            try {
+                const { data: updateData, error: updateError } = await supabase
+                    .from('users')
+                    .update({ avatar_url: publicUrl })
+                    .eq('id', profile.id)
+                    .select();
+
+                if (updateError) {
+                    console.error('[AVATAR UPLOAD]   - ❌ Profile update error:', updateError);
+                    console.error('[AVATAR UPLOAD]   - Error code:', (updateError as any)?.code);
+                    console.error('[AVATAR UPLOAD]   - Error message:', updateError.message);
+                    throw updateError;
+                }
+
+                return { data: publicUrl, error: null };
+            } catch (updateError) {
+                console.error('[AVATAR UPLOAD]   - ❌ Profile update exception:', updateError);
+                throw updateError;
+            }
+
+        } catch (error) {
         }
-
-        if (fileSize > 1024 * 1024) {
-            throw new Error('Image cannot be compressed under 1MB. Please use a simpler image.');
-        }
-
-        // Read final file as base64
-        // Use string 'base64' directly to avoid type access issues on dynamic import
-        const base64 = await readAsStringAsync(currentUri, { encoding: 'base64' });
-        const arrayBuffer = decode(base64);
-
-        // Upload to storage
-        const fileName = `${profile.id}/avatar.jpg`;
-        const { error: uploadError } = await supabase.storage
-            .from('avatars')
-            .upload(fileName, arrayBuffer, {
-                contentType: 'image/jpeg',
-                upsert: true
-            });
-
-        if (uploadError) throw uploadError;
-
-        // Get public URL
-        const { data: { publicUrl } } = supabase.storage
-            .from('avatars')
-            .getPublicUrl(fileName);
-
-        // Update profile
-        const { error: updateError } = await supabase
-            .from('users')
-            .update({ avatar_url: publicUrl })
-            .eq('id', profile.id);
-
-        if (updateError) throw updateError;
-
-        return { data: publicUrl, error: null };
     },
 
     deleteAvatar: async () => {
@@ -500,7 +671,8 @@ export const api = {
         if (!profile) throw new Error('Profile not found');
 
         // Delete from storage
-        const fileName = `${profile.id}/avatar.jpg`;
+        // IMPORTANT: Use auth user ID (user.id) not profile ID to match upload path
+        const fileName = `${user.id}/avatar.jpg`;
         await supabase.storage.from('avatars').remove([fileName]);
 
         // Clear avatar_url in profile
@@ -512,5 +684,29 @@ export const api = {
         if (error) throw error;
 
         return { error: null };
+    },
+    deleteAccount: async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return { error: new Error('Not authenticated') };
+
+        const { data, error } = await supabase.functions.invoke('delete-account', {
+            headers: { Authorization: `Bearer ${session.access_token}` }
+        });
+
+        if (error) {
+            console.warn('Delete account error:', error);
+            const errorContext = (error as any).context;
+            if (errorContext && typeof errorContext.json === 'function') {
+                try {
+                    const errorMessage = await errorContext.json();
+                    return { error: new Error(errorMessage.error || JSON.stringify(errorMessage)) };
+                } catch (e) {
+                    console.warn('Failed to parse error context JSON', e);
+                }
+            }
+            return { error };
+        }
+
+        return { data, error: null };
     }
 };

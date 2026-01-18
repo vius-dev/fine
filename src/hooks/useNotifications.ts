@@ -90,6 +90,8 @@ export const useNotifications = () => {
 
                 // Check for escalation alert from a contact
                 const data = notification.request.content.data as any;
+                const senderName = data?.user_name || data?.user_email || 'Someone';
+
                 if (data?.type === 'ESCALATION_ALERT') {
                     // Play alert sound
                     playRingtone('urgent', 100, true).catch(console.error);
@@ -97,16 +99,42 @@ export const useNotifications = () => {
                     // Show alert dialog
                     Alert.alert(
                         '🚨 Emergency Alert',
-                        `${data.user_email} needs help! They missed their check-in.`,
+                        `${senderName} needs help! They missed their check-in.`,
                         [
                             {
                                 text: 'Acknowledge',
-                                onPress: () => {
+                                onPress: async () => {
                                     stopRingtone();
+                                    // Notify sender that we received it
+                                    try {
+                                        if (data?.user_id) {
+                                            await api.acknowledgeAlert(data.user_id);
+                                        }
+                                    } catch (err) {
+                                        console.warn('Failed to send acknowledgment', err);
+                                    }
                                 },
                             },
                         ],
                         { cancelable: false }
+                    );
+                }
+
+                // Check for acknowledgment receipt (Original sender receives this)
+                if (data?.type === 'ACKNOWLEDGMENT') {
+                    Alert.alert(
+                        '✅ Help is Coming',
+                        `${senderName} has acknowledged your alert.`,
+                        [{ text: 'OK' }]
+                    );
+                }
+
+                // Check for test alert
+                if (data?.type === 'TEST_ALERT') {
+                    Alert.alert(
+                        '🔔 Test Alert',
+                        `${senderName} is testing their alert system. No action required.`,
+                        [{ text: 'OK' }]
                     );
                 }
 
@@ -118,7 +146,7 @@ export const useNotifications = () => {
                     // Show safe dialog
                     Alert.alert(
                         '✅ User is Safe',
-                        `${data.user_email} has marked themselves as safe. The emergency is resolved.`,
+                        `${senderName} has marked themselves as safe. The emergency is resolved.`,
                         [{ text: 'OK' }],
                         { cancelable: true }
                     );
@@ -143,7 +171,8 @@ export const useNotifications = () => {
                                         if (error) throw error;
                                         Alert.alert('Success', 'You are now a trusted contact.');
                                     } catch (error: any) {
-                                        Alert.alert('Error', 'Failed to accept request: ' + error.message);
+                                        // Silently log error - don't show to user
+                                        console.warn('Failed to accept contact request:', error);
                                     }
                                 }
                             }
@@ -165,6 +194,7 @@ export const useNotifications = () => {
 
             responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
                 const data = response.notification.request.content.data as any;
+                const senderName = data?.user_name || data?.user_email || 'Someone';
 
                 // Stop any playing ringtone when user taps notification
                 stopRingtone();
@@ -174,7 +204,15 @@ export const useNotifications = () => {
                     // For now, just acknowledge
                     Alert.alert(
                         'Contact Alert',
-                        `${data.user_email} has been escalated. Please contact them.`,
+                        `${senderName} has been escalated. Please contact them.`,
+                        [{ text: 'OK' }]
+                    );
+                }
+
+                if (data?.type === 'TEST_ALERT') {
+                    Alert.alert(
+                        '🔔 Test Alert',
+                        `${senderName} checks out fine. No action needed.`,
                         [{ text: 'OK' }]
                     );
                 }
@@ -183,7 +221,7 @@ export const useNotifications = () => {
                     // User tapped the resolution notification
                     Alert.alert(
                         '✅ User is Safe',
-                        `${data.user_email} is safe. Emergency resolved.`,
+                        `${senderName} is safe. Emergency resolved.`,
                         [{ text: 'OK' }]
                     );
                 }
@@ -202,7 +240,8 @@ export const useNotifications = () => {
                                         if (error) throw error;
                                         Alert.alert('Success', 'You are now a trusted contact.');
                                     } catch (error: any) {
-                                        Alert.alert('Error', 'Failed to accept request: ' + error.message);
+                                        // Silently log error - don't show to user
+                                        console.warn('Failed to accept contact request:', error);
                                     }
                                 }
                             }

@@ -20,11 +20,19 @@ type Contact = {
   linked_user: {
     id: string;
     email: string;
+    full_name?: string;
     avatar_url?: string;
   } | null;
-  user?: { // For incoming invites
+  owner?: { // The person who owns this contact (who invited you)
     id: string;
     email: string;
+    full_name?: string;
+    avatar_url?: string;
+  } | null;
+  user?: { // For incoming invites in "I'm Protecting" tab
+    id: string;
+    email: string;
+    full_name?: string;
     raw_user_meta_data?: any;
   }
 };
@@ -240,7 +248,8 @@ export default function ContactsScreen() {
       Alert.alert(t('common.success'), "Invitation accepted!");
       fetchContacts();
     } catch (error: any) {
-      Alert.alert(t('common.error'), error.message);
+      // Silently log error - don't show to user
+      console.warn('Failed to confirm invite:', error);
     }
   };
 
@@ -334,7 +343,11 @@ export default function ContactsScreen() {
           </View>
         </View>
       </View>
-      <Text style={styles.contactDetail}>{item.destination}</Text>
+      {/* My Guardians: Show nickname (item.name) or their chosen full name */}
+      {/* Hide email address as requested */}
+      <Text style={styles.contactDetail}>
+        {item.linked_user?.full_name || item.destination}
+      </Text>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.sm }}>
         <Text style={styles.channelLabel}>
           {item.linked_user ? 'PUSH (In-App)' : item.channel}
@@ -365,13 +378,16 @@ export default function ContactsScreen() {
     <View style={styles.card}>
       <View style={styles.cardHeader}>
         <Avatar
-          uri={item.linked_user?.avatar_url}
+          uri={item.owner?.avatar_url || item.user?.raw_user_meta_data?.avatar_url}
           size={48}
-          fallbackInitials={item.name?.charAt(0).toUpperCase() || item.linked_user?.email?.charAt(0).toUpperCase()}
+          fallbackInitials={item.name?.charAt(0).toUpperCase() || item.owner?.email?.charAt(0).toUpperCase() || item.user?.email?.charAt(0).toUpperCase()}
         />
         <View style={{ flex: 1, marginLeft: Spacing.sm }}>
-          <Text style={styles.contactName}>{item.name || item.linked_user?.email || 'Unknown User'}</Text>
-          <Text style={styles.contactDetail}>{item.linked_user?.email || 'FineApp User'}</Text>
+          {/* For "I'm Protecting", show the person we are protecting (owner) */}
+          <Text style={styles.contactName}>{item.owner?.full_name || item.user?.full_name || 'FineApp User'}</Text>
+          <Text style={styles.contactDetail}>
+            {item.name ? `Linked as: ${item.name}` : 'Protected User'}
+          </Text>
         </View>
         {type === 'pending' && <View style={styles.pendingBadge}><Text style={styles.pendingBadgeText}>INVITE</Text></View>}
         {type === 'active' && <View style={styles.activeBadge}><Text style={styles.activeBadgeText}>ACTIVE</Text></View>}
@@ -410,7 +426,7 @@ export default function ContactsScreen() {
   return (
     <Screen style={styles.container}>
       <View style={styles.header}>
-        <Text style={Typography.h1}>{t('contacts.title')}</Text>
+
         <Text style={[Typography.body, styles.subtitle]}>
           {t('contacts.subtitle')}
         </Text>

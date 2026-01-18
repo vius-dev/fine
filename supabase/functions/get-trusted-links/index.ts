@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
             )
         }
 
-        console.log('Authenticated user:', user.email)
+
 
         // ------------------------------------------------------------------
         // Fetch internal user profile
@@ -107,7 +107,14 @@ Deno.serve(async (req) => {
 
             const { data, error } = await adminClient
                 .from('contacts')
-                .select('*')
+                .select(`
+                    *,
+                    owner:users!user_id (
+                        id,
+                        email,
+                        avatar_url
+                    )
+                `)
                 .eq('status', 'PENDING')
                 .or(orString)
 
@@ -132,6 +139,13 @@ Deno.serve(async (req) => {
         linked_user:users!linked_user_id (
           id,
           email,
+          full_name,
+          avatar_url
+        ),
+        owner:users!user_id (
+          id,
+          email,
+          full_name,
           avatar_url
         )
       `)

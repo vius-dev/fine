@@ -65,7 +65,7 @@ export default function HomeScreen() {
   const confirmPanic = async () => {
     setPanicModalVisible(false);
     try {
-      const { error } = await api.updateProfile({ state: 'ESCALATED' });
+      const { error } = await api.escalate();
       if (error) throw error;
       // No need to alert, the UI will change automatically via real-time or refetch
       refetch();

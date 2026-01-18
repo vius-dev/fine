@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
             )
         }
 
-        console.log('Authorization header OK')
+
 
         // --- ADMIN CLIENT ---
         const adminClient = createClient(
@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
             throw new Error('Unauthorized: No user found')
         }
 
-        console.log('Authenticated user:', user.email)
+
 
         // --- REQUEST BODY ---
         const { contact_id } = await req.json()

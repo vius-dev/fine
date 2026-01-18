@@ -222,7 +222,7 @@ export default function SettingsScreen() {
                         onPress={() => setIntervalModalVisible(true)}
                     >
                         <View style={styles.textColumn}>
-                            <Text style={styles.label}>Check-in Interval</Text>
+
                             <Text style={styles.intervalValue}>
                                 {t('message.every_hours', { hours: profile?.checkin_interval_hours || 24 })}
                             </Text>
@@ -235,7 +235,7 @@ export default function SettingsScreen() {
                         onPress={() => setGracePeriodModalVisible(true)}
                     >
                         <View style={styles.textColumn}>
-                            <Text style={styles.label}>{t('settings.grace_period_label')}</Text>
+
                             <Text style={styles.description}>{t('settings.grace_period_desc')}</Text>
                             <Text style={styles.intervalValue}>
                                 {(() => {
@@ -255,7 +255,7 @@ export default function SettingsScreen() {
 
                     <View style={styles.row}>
                         <View style={styles.textColumn}>
-                            <Text style={styles.label}>{t('settings.reminders_label')}</Text>
+
                             <Text style={styles.description}>{t('settings.reminders_desc')}</Text>
                         </View>
                         <Switch
@@ -324,7 +324,7 @@ export default function SettingsScreen() {
                     {/* Enable/Disable Ringtone */}
                     <View style={styles.row}>
                         <View style={styles.textColumn}>
-                            <Text style={styles.label}>{t('settings.escalation_sound_label')}</Text>
+
                             <Text style={styles.description}>{t('settings.escalation_sound_desc')}</Text>
                         </View>
                         <Switch
@@ -461,6 +461,42 @@ export default function SettingsScreen() {
                         onPress={handleLogout}
                         style={styles.logoutButton}
                     />
+
+                    <View style={{ marginTop: Spacing.xl, paddingTop: Spacing.xl, borderTopWidth: 1, borderTopColor: Colors.border }}>
+                        <Button
+                            title="Delete Account"
+                            variant="primary" // Using primary with red style override
+                            onPress={() => {
+                                Alert.alert(
+                                    'Delete Account',
+                                    'Are you sure? This action cannot be undone. all your data will be permanently removed.',
+                                    [
+                                        { text: t('common.cancel'), style: 'cancel' },
+                                        {
+                                            text: 'Delete',
+                                            style: 'destructive',
+                                            onPress: async () => {
+                                                try {
+                                                    const { error } = await api.deleteAccount();
+                                                    if (error) throw error;
+                                                    await supabase.auth.signOut();
+                                                    router.replace('/(auth)/login');
+                                                    Alert.alert('Account Deleted', 'Your account has been successfully deleted.');
+                                                } catch (error: any) {
+                                                    Alert.alert(t('common.error'), error.message);
+                                                }
+                                            }
+                                        }
+                                    ]
+                                );
+                            }}
+                            style={{ backgroundColor: Colors.escalated, borderColor: Colors.escalated }}
+                            textStyle={{ color: 'white' }}
+                        />
+                        <Text style={[styles.description, { textAlign: 'center', marginTop: Spacing.sm, color: Colors.escalated }]}>
+                            Danger Zone: This action is irreversible.
+                        </Text>
+                    </View>
                     <Text style={styles.version}>{t('settings.footer_version')}</Text>
                 </View>
             </ScrollView>

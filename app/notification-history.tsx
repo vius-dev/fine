@@ -1,8 +1,8 @@
 import { format } from 'date-fns';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 import { Screen } from '../src/components/Screen';
 import { api } from '../src/lib/api';
 import { Colors, Spacing, Typography } from '../src/theme';
@@ -145,11 +145,13 @@ export default function NotificationHistoryScreen() {
 
     return (
         <Screen style={styles.container}>
+            <Stack.Screen options={{ title: 'Notification History', headerBackTitle: 'Back' }} />
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                {/* Custom back button removed as native header provides it, but keeping structure if needed for subtitle */}
+                {/* <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <Text style={styles.backButtonText}>{t('notification_history.back')}</Text>
-                </TouchableOpacity>
-                <Text style={Typography.h1}>{t('notification_history.title')}</Text>
+                </TouchableOpacity> */}
+                {/* Title removed as we use native header */}
                 <Text style={[Typography.body, styles.subtitle]}>
                     {t('notification_history.subtitle')}
                 </Text>

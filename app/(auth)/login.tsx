@@ -12,6 +12,7 @@ export default function LoginScreen() {
     const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [fullName, setFullName] = useState('');
     const [loading, setLoading] = useState(false);
     const [isSignUp, setIsSignUp] = useState(false);
     const router = useRouter();
@@ -27,7 +28,12 @@ export default function LoginScreen() {
             if (isSignUp) {
                 const { error } = await supabase.auth.signUp({
                     email,
-                    password
+                    password,
+                    options: {
+                        data: {
+                            full_name: fullName
+                        }
+                    }
                 });
                 if (error) throw error;
                 Alert.alert(t('common.success'), t('auth.verification_sent'));
@@ -61,6 +67,14 @@ export default function LoginScreen() {
                     </View>
 
                     <View style={styles.form}>
+                        {isSignUp && (
+                            <TextInput
+                                label={t('auth.full_name_label') || "Full Name"}
+                                value={fullName}
+                                onChangeText={setFullName}
+                                placeholder="Onyinye Edison"
+                            />
+                        )}
                         <TextInput
                             label={t('auth.email_label')}
                             value={email}
