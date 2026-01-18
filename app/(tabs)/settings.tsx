@@ -435,11 +435,13 @@ export default function SettingsScreen() {
                         />
                         <View style={styles.avatarButtons}>
                             <Button
-                                title={uploadingAvatar ? 'Uploading...' : (profile?.avatar_url ? 'Change Photo' : 'Add Photo')}
+                                title={uploadingAvatar ? '...' : (profile?.avatar_url ? 'Change' : 'Add')}
                                 variant="outline"
                                 size="small"
                                 onPress={handleUploadAvatar}
                                 disabled={uploadingAvatar}
+                                style={{ paddingHorizontal: 12 }}
+                                textStyle={{ fontSize: 12 }}
                             />
                             {profile?.avatar_url && (
                                 <Button
@@ -448,7 +450,8 @@ export default function SettingsScreen() {
                                     size="small"
                                     onPress={handleDeleteAvatar}
                                     disabled={uploadingAvatar}
-                                    style={{ marginLeft: Spacing.sm }}
+                                    style={{ marginLeft: Spacing.xs, paddingHorizontal: 12 }}
+                                    textStyle={{ fontSize: 12 }}
                                 />
                             )}
                         </View>
@@ -775,5 +778,7 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: Spacing.xs,
     },
 });

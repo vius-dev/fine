@@ -47,3 +47,7 @@ prd.md
 supabase/migrations/
 .idea/
 
+# Temporary debug/setup files
+STORAGE_SETUP.md
+debug_contacts.sql
+schema_dump.sql

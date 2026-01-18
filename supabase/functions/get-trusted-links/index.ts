@@ -87,7 +87,6 @@ Deno.serve(async (req) => {
             throw new Error('User profile not found')
         }
 
-        console.log('Internal user ID:', userProfile.id)
 
         // ------------------------------------------------------------------
         // Pending invites (email OR phone)
@@ -103,7 +102,6 @@ Deno.serve(async (req) => {
                 .map((v) => `destination.eq.${v}`)
                 .join(',')
 
-            console.log('Fetching pending invites with OR string:', orString)
 
             const { data, error } = await adminClient
                 .from('contacts')
@@ -123,14 +121,12 @@ Deno.serve(async (req) => {
                 throw error
             }
 
-            console.log('Pending invites found:', data?.length || 0)
             pending = data ?? []
         }
 
         // ------------------------------------------------------------------
         // Active links (confirmed) - use internal user ID
         // ------------------------------------------------------------------
-        console.log('Fetching active links for internal user ID:', userProfile.id)
 
         const { data: active, error: activeError } = await adminClient
             .from('contacts')
@@ -157,7 +153,6 @@ Deno.serve(async (req) => {
             throw activeError
         }
 
-        console.log('Active links found:', active?.length || 0)
 
         // ------------------------------------------------------------------
         // Success response

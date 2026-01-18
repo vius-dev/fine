@@ -6,15 +6,12 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
-    // Handle CORS preflight requests
+    // Handle CORS preflight
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
     }
 
     try {
-        // ------------------------------------------------------------------
-        // Auth header validation
-        // ------------------------------------------------------------------
         const authHeader = req.headers.get('authorization')
         if (!authHeader) {
             return new Response(
@@ -23,67 +20,48 @@ Deno.serve(async (req) => {
             )
         }
 
-        // ------------------------------------------------------------------
-        // Admin client (service role)
-        // ------------------------------------------------------------------
         const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
-        const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+        const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
-        if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-            throw new Error('Missing Supabase environment variables')
+        if (!SUPABASE_URL || !SERVICE_KEY) {
+            throw new Error('Missing Supabase env vars')
         }
 
-        const adminClient = createClient(
-            SUPABASE_URL,
-            SUPABASE_SERVICE_ROLE_KEY
-        )
+        const admin = createClient(SUPABASE_URL, SERVICE_KEY)
 
-        // ------------------------------------------------------------------
-        // Verify user - GET USER ID FROM TOKEN
-        // ------------------------------------------------------------------
+        // Get authenticated user
         const token = authHeader.replace('Bearer ', '')
-        const {
-            data: { user },
-            error: authError,
-        } = await adminClient.auth.getUser(token)
+        const { data, error } = await admin.auth.getUser(token)
 
-        if (authError || !user) {
+        if (error || !data.user) {
             return new Response(
                 JSON.stringify({ error: 'Unauthorized' }),
                 { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
             )
         }
 
+        const userId = data.user.id
 
-
-        // ------------------------------------------------------------------
-        // DELETE USER
-        // ------------------------------------------------------------------
-        const { error: deleteError } = await adminClient.auth.admin.deleteUser(user.id)
+        // Perform deletion via Auth Admin
+        // This will cascade to public.users and dependent tables (contacts, events)
+        // thanks to the ON DELETE CASCADE constraints.
+        const { error: deleteError } = await admin.auth.admin.deleteUser(userId)
 
         if (deleteError) {
             console.error('Failed to delete user:', deleteError)
             throw deleteError
         }
 
-
-
         return new Response(
-            JSON.stringify({ success: true, message: 'Account deleted successfully' }),
-            {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 200,
-            }
+            JSON.stringify({ success: true, message: 'Account deleted' }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
 
-    } catch (error: any) {
-        console.error('Delete account error:', error)
+    } catch (err: any) {
+        console.error('Account deletion failed:', err)
         return new Response(
-            JSON.stringify({ error: error.message || 'Internal Server Error' }),
-            {
-                status: 500,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            }
+            JSON.stringify({ error: err.message }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
     }
 })

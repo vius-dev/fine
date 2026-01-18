@@ -77,8 +77,6 @@ Deno.serve(async (req) => {
             throw new Error('User profile not found')
         }
 
-        console.log('Internal user ID:', userProfile.id)
-
         // Verify Identity
         // - MATCH: The authenticated user's email or phone MUST match the contact's destination
         // - OR LINKED: The authenticated user IS the linked_user_id (for unlinking)

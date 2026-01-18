@@ -636,7 +636,7 @@ export const api = {
             try {
                 const { data: updateData, error: updateError } = await supabase
                     .from('users')
-                    .update({ avatar_url: publicUrl })
+                    .update({ avatar_url: `${publicUrl}?t=${new Date().getTime()}` })
                     .eq('id', profile.id)
                     .select();
 
@@ -653,7 +653,9 @@ export const api = {
                 throw updateError;
             }
 
-        } catch (error) {
+        } catch (error: any) {
+            console.error('[AVATAR UPLOAD]   - ❌ Unexpected error:', error);
+            return { data: null, error };
         }
     },
 
