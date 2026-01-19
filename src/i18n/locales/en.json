@@ -36,6 +36,7 @@
         "grace_period_desc": "Time before guardians are notified",
         "grace_period_modal_title": "Grace Period",
         "grace_period_modal_desc": "How long after a missed check-in should we wait before alerting guardians?",
+        "danger_zone_warning": "Danger Zone: This action is irreversible.",
         "system_check": "System Check",
         "transparency": "Transparency",
         "timezone": "Time Zone",
@@ -54,7 +55,7 @@
         "set_to_12h": "Set to 12h",
         "set_to_24h": "Set to 24h",
         "remind_me": "Remind me",
-        "footer_version": "ImFine v1.0.0 (MVP)",
+        "footer_version": "FineApp v1.0.0 (MVP)",
         "view_notification_history": "View Notification History",
         "view_notification_activity": "View your notification activity",
         "current_timezone": "Current: {{timezone}}",
@@ -68,9 +69,15 @@
         "save": "Save",
         "not_found_title": "This screen doesn't exist.",
         "go_home": "Go to home screen!",
-        "modal_title": "Modal"
+        "modal_title": "Modal",
+        "minutes": "minutes",
+        "minute": "minute",
+        "hour": "hour",
+        "hours": "hours"
     },
     "contacts": {
+        "my_guardians": "My Guardians",
+        "im_protecting": "I'm Protecting",
         "subtitle": "These trusted contacts will be notified if you miss a check-in.",
         "add_contact": "Contact",
         "edit_contact": "Edit Contact",
@@ -188,7 +195,8 @@
         "active_desc": "Tap the button to confirm you're FINE.\n\nYour trusted contacts will be notified if you miss to check-in with them.",
         "panic_modal_title": "⚠️ EMERGENCY ALERT",
         "panic_modal_desc": "Are you sure? This will immediately notify your trusted contacts that you need help.",
-        "panic_modal_button": "SEND ALERT"
+        "panic_modal_button": "SEND ALERT",
+        "next_checkin_in": "Next check-in in"
     },
     "auth": {
         "login_title": "Welcome Back",

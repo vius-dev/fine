@@ -35,6 +35,10 @@
         "escalation_alert": "Alerte d'escalade",
         "escalation_sound_label": "Son d'alerte",
         "escalation_sound_desc": "Jouer un son lors de l'escalade",
+        "grace_period_desc": "Temps avant la notification des gardiens",
+        "grace_period_modal_title": "Période de grâce",
+        "grace_period_modal_desc": "Combien de temps après un enregistrement manqué devons-nous attendre avant d'alerter les gardiens ?",
+        "danger_zone_warning": "Zone dangereuse : Cette action est irréversible.",
         "system_check": "Vérification du système",
         "transparency": "Transparence",
         "timezone": "Fuseau horaire",
@@ -53,7 +57,7 @@
         "set_to_12h": "Régler sur 12h",
         "set_to_24h": "Régler sur 24h",
         "remind_me": "Me rappeler",
-        "footer_version": "ImFine v1.0.0 (MVP)",
+        "footer_version": "FineApp v1.0.0 (MVP)",
         "view_notification_history": "Voir l'historique des notifications",
         "view_notification_activity": "Voir votre activité de notification",
         "current_timezone": "Actuel: {{timezone}}",
@@ -67,9 +71,15 @@
         "save": "Enregistrer",
         "not_found_title": "Cette page n'existe pas.",
         "go_home": "Aller à la page d'accueil !",
-        "modal_title": "Modal"
+        "modal_title": "Modal",
+        "minutes": "minutes",
+        "minute": "minute",
+        "hour": "heure",
+        "hours": "heures"
     },
     "contacts": {
+        "my_guardians": "Mes gardiens",
+        "im_protecting": "Je protège",
         "title": "Contacts de confiance",
         "subtitle": "Ces contacts de confiance seront avertis si vous n'enregistrez pas.",
         "add_contact": "Ajouter un contact",
@@ -182,7 +192,8 @@
         "active_desc": "Appuyez sur le bouton pour confirmer que vous allez BIEN.\n\nVos contacts de confiance seront avertis si vous oubliez de vous enregistrer.",
         "panic_modal_title": "⚠️ ALERTE D'URGENCE",
         "panic_modal_desc": "Êtes-vous sûr ? Cela avertira immédiatement vos contacts de confiance que vous avez besoin d'aide.",
-        "panic_modal_button": "ENVOYER L'ALERTE"
+        "panic_modal_button": "ENVOYER L'ALERTE",
+        "next_checkin_in": "Prochain enregistrement dans"
     },
     "auth": {
         "login_title": "Bon retour",

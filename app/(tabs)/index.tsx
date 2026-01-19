@@ -215,7 +215,7 @@ export default function HomeScreen() {
         {/* Check-in Countdown Timer */}
         {!isGracePeriod && !isVacation && !isOnboarding && checkInCountdown && (
           <View style={styles.countdownContainer}>
-            <Text style={styles.countdownLabel}>Next check-in in</Text>
+            <Text style={styles.countdownLabel}>{t('home.next_checkin_in')}</Text>
             <Text style={[
               styles.countdownText,
               { color: isApproachingDeadline ? Colors.grace : Colors.active }

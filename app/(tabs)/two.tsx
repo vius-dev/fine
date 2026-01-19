@@ -437,13 +437,13 @@ export default function ContactsScreen() {
             style={[styles.segment, activeTab === 'guardians' && styles.segmentActive]}
             onPress={() => setActiveTab('guardians')}
           >
-            <Text style={[styles.segmentText, activeTab === 'guardians' && styles.segmentTextActive]}>My Guardians</Text>
+            <Text style={[styles.segmentText, activeTab === 'guardians' && styles.segmentTextActive]}>{t('contacts.my_guardians')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.segment, activeTab === 'protecting' && styles.segmentActive]}
             onPress={() => setActiveTab('protecting')}
           >
-            <Text style={[styles.segmentText, activeTab === 'protecting' && styles.segmentTextActive]}>I'm Protecting</Text>
+            <Text style={[styles.segmentText, activeTab === 'protecting' && styles.segmentTextActive]}>{t('contacts.im_protecting')}</Text>
           </TouchableOpacity>
         </View>
       </View>

@@ -35,6 +35,10 @@
         "escalation_alert": "Eskalationsalarm",
         "escalation_sound_label": "Alarmton",
         "escalation_sound_desc": "Ton abspielen, wenn eskaliert",
+        "grace_period_desc": "Zeit vor Benachrichtigung der Wächter",
+        "grace_period_modal_title": "Gnadenfrist",
+        "grace_period_modal_desc": "Wie lange sollen wir nach einem verpassten Check-in warten, bevor wir die Wächter alarmieren?",
+        "danger_zone_warning": "Gefahrenzone: Diese Aktion ist unwiderruflich.",
         "system_check": "Systemprüfung",
         "transparency": "Transparenz",
         "timezone": "Zeitzone",
@@ -53,7 +57,7 @@
         "set_to_12h": "Auf 12h einstellen",
         "set_to_24h": "Auf 24h einstellen",
         "remind_me": "Erinnere mich",
-        "footer_version": "ImFine v1.0.0 (MVP)",
+        "footer_version": "FineApp v1.0.0 (MVP)",
         "view_notification_history": "Benachrichtigungsverlauf anzeigen",
         "view_notification_activity": "Ihre Benachrichtigungsaktivität anzeigen",
         "current_timezone": "Aktuell: {{timezone}}",
@@ -67,9 +71,15 @@
         "save": "Speichern",
         "not_found_title": "Diese Seite existiert nicht.",
         "go_home": "Gehe zur Startseite!",
-        "modal_title": "Modal"
+        "modal_title": "Modal",
+        "minutes": "Minuten",
+        "minute": "Minute",
+        "hour": "Stunde",
+        "hours": "Stunden"
     },
     "contacts": {
+        "my_guardians": "Meine Wächter",
+        "im_protecting": "Ich schütze",
         "title": "Vertrauenskontakte",
         "subtitle": "Diese vertrauenswürdigen Kontakte werden benachrichtigt, falls Sie einen Check-in versäumen.",
         "add_contact": "Kontakt ",
@@ -182,7 +192,8 @@
         "active_desc": "Tippen Sie auf die Schaltfläche, um zu bestätigen, dass es Ihnen GUT geht.\n\nIhre Vertrauenskontakte werden benachrichtigt, wenn Sie vergessen, bei ihnen einzuchecken.",
         "panic_modal_title": "⚠️ NOTFALLALARM",
         "panic_modal_desc": "Sind Sie sicher? Dies wird Ihre Vertrauenskontakte sofort benachrichtigen, dass Sie Hilfe benötigen.",
-        "panic_modal_button": "ALARM SENDEN"
+        "panic_modal_button": "ALARM SENDEN",
+        "next_checkin_in": "Nächster Check-in in"
     },
     "auth": {
         "login_title": "Willkommen zurück",

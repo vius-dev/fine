@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
         let title, pushBody, subject, emailHtml
 
         if (type === 'ACKNOWLEDGMENT') {
-            title = '✅ Help is coming'
+            title = `✅ ${userName} Has been alerted`
             pushBody = `${userName} has received your alert and is checking on you.`
             subject = `✅ Alert Acknowledged by ${userName}`
             emailHtml = `

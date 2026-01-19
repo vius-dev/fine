@@ -123,7 +123,7 @@ export const useNotifications = () => {
                 // Check for acknowledgment receipt (Original sender receives this)
                 if (data?.type === 'ACKNOWLEDGMENT') {
                     Alert.alert(
-                        '✅ Help is Coming',
+                        `✅ ${senderName} Has been alerted`,
                         `${senderName} has acknowledged your alert.`,
                         [{ text: 'OK' }]
                     );

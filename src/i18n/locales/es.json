@@ -35,6 +35,10 @@
         "escalation_alert": "Alerta de Escalada",
         "escalation_sound_label": "Sonido de Alerta",
         "escalation_sound_desc": "Reproducir sonido al escalar",
+        "grace_period_desc": "Tiempo antes de notificar a los contactos",
+        "grace_period_modal_title": "Período de Gracia",
+        "grace_period_modal_desc": "¿Cuánto tiempo después de un registro perdido debemos esperar antes de alertar a los contactos?",
+        "danger_zone_warning": "Zona de peligro: Esta acción es irreversible.",
         "system_check": "Verificación del Sistema",
         "transparency": "Transparencia",
         "timezone": "Zona Horaria",
@@ -53,7 +57,7 @@
         "set_to_12h": "Cambiar a 12h",
         "set_to_24h": "Cambiar a 24h",
         "remind_me": "Recordarme",
-        "footer_version": "ImFine v1.0.0 (MVP)",
+        "footer_version": "FineApp v1.0.0 (MVP)",
         "view_notification_history": "Ver Historial de Notificaciones",
         "view_notification_activity": "Ver tu actividad de notificaciones",
         "current_timezone": "Actual: {{timezone}}",
@@ -67,9 +71,15 @@
         "save": "Guardar",
         "not_found_title": "Esta pantalla no existe.",
         "go_home": "¡Ir a la pantalla de inicio!",
-        "modal_title": "Modal"
+        "modal_title": "Modal",
+        "minutes": "minutos",
+        "minute": "minuto",
+        "hour": "hora",
+        "hours": "horas"
     },
     "contacts": {
+        "my_guardians": "Mis Guardianes",
+        "im_protecting": "Estoy Protegiendo",
         "title": "Contactos de Confianza",
         "subtitle": "Estos contactos de confianza serán notificados si no se registra.",
         "add_contact": "Contacto",
@@ -182,7 +192,8 @@
         "active_desc": "Toca el botón para confirmar que estás BIEN.\n\nTus contactos de confianza serán notificados si olvidas registrarte con ellos.",
         "panic_modal_title": "⚠️ ALERTA DE EMERGENCIA",
         "panic_modal_desc": "¿Estás seguro? Esto notificará inmediatamente a tus contactos de confianza que necesitas ayuda.",
-        "panic_modal_button": "ENVIAR ALERTA"
+        "panic_modal_button": "ENVIAR ALERTA",
+        "next_checkin_in": "Próximo registro en"
     },
     "auth": {
         "login_title": "Bienvenido de nuevo",

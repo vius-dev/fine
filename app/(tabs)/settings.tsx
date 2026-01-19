@@ -497,7 +497,7 @@ export default function SettingsScreen() {
                             textStyle={{ color: 'white' }}
                         />
                         <Text style={[styles.description, { textAlign: 'center', marginTop: Spacing.sm, color: Colors.escalated }]}>
-                            Danger Zone: This action is irreversible.
+                            {t('settings.danger_zone_warning')}
                         </Text>
                     </View>
                     <Text style={styles.version}>{t('settings.footer_version')}</Text>
